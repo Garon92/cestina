@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Čeština pro Adámka</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="main-area" style="justify-content: center; padding-top: 40px;">
+    <h1 style="font-size: 2.2rem; color: var(--gold); text-align: center; margin-bottom: 6px;">
+      Čeština pro Adámka
+    </h1>
+    <p style="color: var(--gray); margin-bottom: 30px; text-align: center;">Vyber si, co chceš procvičovat</p>
+
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    const modules = [
+      {
+        href: 'abeceda.html',
+        icon: '🔤',
+        label: 'Abeceda',
+        desc: 'Všechna písmena a jak se čtou',
+        key: 'abeceda'
+      },
+      {
+        href: 'poznavani.html',
+        icon: '🧩',
+        label: 'Poznávání',
+        desc: 'Poznáš velké a malé písmeno?',
+        key: 'poznavani'
+      },
+      {
+        href: 'parovani.html',
+        icon: '🔗',
+        label: 'Párování',
+        desc: 'Spoj velká a malá písmenka',
+        key: 'parovani'
+      },
+      {
+        href: 'poslouchej.html',
+        icon: '👂',
+        label: 'Poslouchej',
+        desc: 'Uslyšíš písmenko, vyber správné',
+        key: 'poslouchej'
+      }
+    ];
+
+    const grid = document.getElementById('menuGrid');
+
+    modules.forEach(m => {
+      const stars = getModuleStars(m.key);
+      const starsHtml = Array.from({ length: 3 }, (_, i) =>
+        `<span class="star-icon ${i < stars ? 'earned' : 'empty'}">${i < stars ? '⭐' : '☆'}</span>`
+      ).join('');
+
+      const card = document.createElement('a');
+      card.href = m.href;
+      card.className = 'card menu-card';
+      card.innerHTML = `
+        <span class="icon">${m.icon}</span>
+        <span class="label">${m.label}</span>
+        <span class="desc">${m.desc}</span>
+        <div class="progress-stars">${starsHtml}</div>
+      `;
+      grid.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>

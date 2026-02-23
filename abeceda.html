@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abeceda – Čeština pro Adámka</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="index.html" class="btn-back">← Menu</a>
+    <span class="page-title">Abeceda</span>
+  </div>
+
+  <div class="main-area">
+    <div class="view-toggle">
+      <button class="btn active" data-view="upper">VELKÁ</button>
+      <button class="btn" data-view="lower">malá</button>
+      <button class="btn" data-view="both">Obě</button>
+    </div>
+
+    <div class="letter-grid" id="letterGrid"></div>
+  </div>
+
+  <!-- Detail overlay -->
+  <div class="letter-detail" id="detail">
+    <div class="letter-detail-inner">
+      <div class="letter-detail-big" id="detailBig"></div>
+      <div class="letter-detail-small" id="detailSmall"></div>
+      <div class="letter-detail-word" id="detailWord"></div>
+      <button class="btn btn-primary btn-speak" id="detailSpeak">🔊 Poslechni si</button>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/abeceda.js"></script>
+
+</body>
+</html>

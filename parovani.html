@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Párování – Čeština pro Adámka</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="index.html" class="btn-back">← Menu</a>
+    <span class="page-title">Párování velká ↔ malá</span>
+  </div>
+
+  <div class="main-area">
+    <div class="round-info" id="roundInfo"></div>
+
+    <p class="feedback" id="feedback">&nbsp;</p>
+
+    <div class="match-area" id="matchArea">
+      <div class="match-column" id="colLeft"></div>
+      <div class="match-column" id="colRight"></div>
+    </div>
+
+    <div class="score-bar">
+      <span>Správně: <span class="value" id="scoreCorrect">0</span></span>
+      <span>Kolo: <span class="value" id="scoreRound">1</span></span>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/parovani.js"></script>
+
+</body>
+</html>
