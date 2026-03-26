@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slova – Čeština pro Adámka</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="index.html" class="btn-back">← Menu</a>
+    <span class="page-title">Poznáš slovo?</span>
+  </div>
+
+  <div class="main-area">
+    <div class="round-info" id="roundInfo">Přečti si slovo a najdi ho malými písmeny</div>
+
+    <div class="word-display" id="wordDisplay"></div>
+
+    <button class="btn btn-primary btn-speaker-sm" id="btnSpeak">🔊</button>
+
+    <p class="feedback" id="feedback">&nbsp;</p>
+
+    <div class="options-grid options-words" id="options"></div>
+
+    <div class="score-bar">
+      <span>Správně: <span class="value" id="scoreCorrect">0</span></span>
+      <span>Pokusy: <span class="value" id="scoreTotal">0</span></span>
+      <span>Série: <span class="value" id="scoreStreak">0</span></span>
+    </div>
+
+    <button class="btn btn-primary" id="btnSkip" style="margin-top: 14px;">Přeskočit (Esc)</button>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/slova.js"></script>
+
+</body>
+</html>

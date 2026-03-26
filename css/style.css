@@ -366,7 +366,7 @@ a { color: var(--gold); text-decoration: none; }
 
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   width: 100%;
   max-width: 700px;
@@ -431,6 +431,63 @@ a { color: var(--gold); text-decoration: none; }
   border-color: var(--gold);
 }
 
+/* ── Word display (slova game) ── */
+
+.word-display {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--gold);
+  text-align: center;
+  margin: 16px 0 8px;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 30px var(--gold-glow);
+}
+
+.btn-speaker-sm {
+  font-size: 1.6rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 8px 0;
+  min-width: 60px;
+  min-height: 60px;
+  padding: 0;
+}
+
+.options-words .btn {
+  font-size: 1.3rem;
+  padding: 14px 10px;
+  min-height: 60px;
+  word-break: break-word;
+}
+
+/* ── Sentence display (věty game) ── */
+
+.sentence-display {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--white);
+  text-align: center;
+  margin: 24px 0 12px;
+  line-height: 1.4;
+  max-width: 600px;
+}
+
+.sentence-blank {
+  display: inline-block;
+  color: var(--gold);
+  border-bottom: 3px dashed var(--gold-dim);
+  padding: 0 8px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.sentence-filled {
+  display: inline;
+  color: var(--green);
+  font-weight: 800;
+}
+
 /* ── Round counter ── */
 
 .round-info {
@@ -444,7 +501,10 @@ a { color: var(--gold); text-decoration: none; }
 
 @media (max-width: 600px) {
   .letter-display { font-size: 4.5rem; }
+  .word-display { font-size: 2.5rem; }
+  .sentence-display { font-size: 1.4rem; }
   .options-grid .btn { font-size: 1.6rem; min-height: 68px; }
+  .options-words .btn { font-size: 1.1rem; min-height: 54px; }
   .letter-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
   .letter-grid .btn { font-size: 1.2rem; min-height: 48px; padding: 8px; }
   .menu-grid { grid-template-columns: 1fr 1fr; gap: 12px; }

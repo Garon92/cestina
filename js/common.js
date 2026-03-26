@@ -143,6 +143,70 @@ function getModuleStars(module) {
   return 0;
 }
 
+/* ── Word quiz data ── */
+
+const WORDS = [
+  { word: 'pes', distractors: ['les', 'nos', 'ves'] },
+  { word: 'kočka', distractors: ['bočka', 'tečka', 'hračka'] },
+  { word: 'dům', distractors: ['lůj', 'sůl', 'stůl'] },
+  { word: 'auto', distractors: ['okno', 'pero', 'rudo'] },
+  { word: 'strom', distractors: ['blesk', 'proud', 'drozd'] },
+  { word: 'míč', distractors: ['klíč', 'meč', 'plíč'] },
+  { word: 'slunce', distractors: ['srdce', 'hřiště', 'moře'] },
+  { word: 'máma', distractors: ['táta', 'žába', 'dáma'] },
+  { word: 'táta', distractors: ['máma', 'bába', 'káva'] },
+  { word: 'škola', distractors: ['včela', 'jízda', 'vlna'] },
+  { word: 'kniha', distractors: ['ryba', 'liška', 'hlína'] },
+  { word: 'voda', distractors: ['ruka', 'nuda', 'hora'] },
+  { word: 'kolo', distractors: ['okno', 'molo', 'selo'] },
+  { word: 'žába', distractors: ['ryba', 'tráva', 'kráva'] },
+  { word: 'liška', distractors: ['myška', 'hruška', 'ryska'] },
+  { word: 'jablko', distractors: ['mléko', 'máslo', 'peklo'] },
+  { word: 'medvěd', distractors: ['oběd', 'soused', 'hřebík'] },
+  { word: 'zajíc', distractors: ['chlapec', 'kolíček', 'prstýnek'] },
+  { word: 'ryba', distractors: ['žába', 'koza', 'ryma'] },
+  { word: 'vlak', distractors: ['pták', 'mrak', 'znak'] },
+  { word: 'hora', distractors: ['nora', 'kůra', 'voda'] },
+  { word: 'hvězda', distractors: ['cesta', 'vesta', 'pěna'] },
+  { word: 'srdce', distractors: ['slunce', 'vejce', 'pekáč'] },
+  { word: 'les', distractors: ['pes', 'ves', 'bez'] },
+  { word: 'květina', distractors: ['hodina', 'polévka', 'peřina'] },
+  { word: 'motýl', distractors: ['kobyl', 'bavlna', 'pýr'] },
+  { word: 'tráva', distractors: ['kráva', 'sláva', 'brána'] },
+  { word: 'mrak', distractors: ['drak', 'brak', 'vlak'] },
+  { word: 'ptáček', distractors: ['háček', 'klíček', 'koláček'] },
+  { word: 'sníh', distractors: ['smích', 'dech', 'pich'] },
+];
+
+/* ── Sentence quiz data ── */
+
+const SENTENCES = [
+  { sentence: 'Kočka pije ___.', answer: 'mléko', options: ['mléko', 'voda', 'chléb', 'káva'] },
+  { sentence: 'Pes má čtyři ___.', answer: 'nohy', options: ['nohy', 'ruce', 'oči', 'uši'] },
+  { sentence: 'Na nebi svítí ___.', answer: 'slunce', options: ['slunce', 'lampa', 'svíčka', 'oheň'] },
+  { sentence: 'Ryba plave ve ___.', answer: 'vodě', options: ['vodě', 'trávě', 'písku', 'vzduchu'] },
+  { sentence: 'V zimě padá ___.', answer: 'sníh', options: ['sníh', 'déšť', 'listí', 'písek'] },
+  { sentence: 'Jablko roste na ___.', answer: 'stromě', options: ['stromě', 'zemi', 'střeše', 'poli'] },
+  { sentence: 'Ptáček umí ___.', answer: 'létat', options: ['létat', 'plavat', 'kopat', 'psát'] },
+  { sentence: 'Děti chodí do ___.', answer: 'školy', options: ['školy', 'lesa', 'nebe', 'řeky'] },
+  { sentence: 'Máma čte ___.', answer: 'knihu', options: ['knihu', 'stůl', 'okno', 'trávu'] },
+  { sentence: 'Táta jezdí ___.', answer: 'autem', options: ['autem', 'kolem', 'letadlem', 'lodí'] },
+  { sentence: 'Žába skáče do ___.', answer: 'rybníka', options: ['rybníka', 'školy', 'postele', 'skříně'] },
+  { sentence: 'Kráva žere ___.', answer: 'trávu', options: ['trávu', 'maso', 'rybu', 'sýr'] },
+  { sentence: 'Na hlavě mám ___.', answer: 'čepici', options: ['čepici', 'botu', 'tašku', 'knihu'] },
+  { sentence: 'V noci svítí ___.', answer: 'měsíc', options: ['měsíc', 'slunce', 'duha', 'mrak'] },
+  { sentence: 'Medvěd spí v ___.', answer: 'jeskyni', options: ['jeskyni', 'škole', 'domě', 'autě'] },
+  { sentence: 'Liška žije v ___.', answer: 'lese', options: ['lese', 'moři', 'městě', 'škole'] },
+  { sentence: 'Květiny rostou na ___.', answer: 'louce', options: ['louce', 'střeše', 'stole', 'židli'] },
+  { sentence: 'Vlak jezdí po ___.', answer: 'kolejích', options: ['kolejích', 'vodě', 'silnici', 'trávě'] },
+  { sentence: 'Motýl má krásná ___.', answer: 'křídla', options: ['křídla', 'kola', 'nohy', 'rohy'] },
+  { sentence: 'Babička peče ___.', answer: 'koláč', options: ['koláč', 'polévku', 'salát', 'zmrzlinu'] },
+  { sentence: 'Drak chrlí ___.', answer: 'oheň', options: ['oheň', 'vodu', 'sníh', 'vítr'] },
+  { sentence: 'Myška je ___.', answer: 'malá', options: ['malá', 'velká', 'modrá', 'rychlá'] },
+  { sentence: 'Slon je velmi ___.', answer: 'velký', options: ['velký', 'malý', 'rychlý', 'tichý'] },
+  { sentence: 'Zajíc má dlouhé ___.', answer: 'uši', options: ['uši', 'nohy', 'rohy', 'zuby'] },
+];
+
 /* ── Utility ── */
 
 function shuffle(arr) {
