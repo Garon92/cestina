@@ -29,7 +29,7 @@ function speakSentenceWithoutAnswer() {
   if (!currentSentence) return;
   const parts = currentSentence.sentence.split('___');
   const withoutWord = (parts[0] || '').trim() + ' ... ' + (parts[1] || '').trim();
-  speak(applyCase(withoutWord), 0.85);
+  speak(withoutWord, 0.85);
 }
 
 function nextRound() {
@@ -81,7 +81,7 @@ function handleAnswer(btn, chosen) {
     showStarsFromElement(btn, 18);
 
     const filled = currentSentence.sentence.replace('___', currentSentence.answer);
-    speak(applyCase(filled), 0.85);
+    speak(filled, 0.85);
 
     const parts = currentSentence.sentence.split('___');
     sentenceDisplay.innerHTML =
@@ -99,7 +99,7 @@ function handleAnswer(btn, chosen) {
     feedbackEl.className = 'feedback wrong-text';
 
     const wrongFilled = currentSentence.sentence.replace('___', chosen);
-    speak(applyCase(wrongFilled), 0.85);
+    speak(wrongFilled, 0.85);
 
     setTimeout(() => {
       btn.classList.remove('wrong');
