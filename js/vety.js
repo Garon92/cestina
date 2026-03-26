@@ -102,8 +102,6 @@ function handleAnswer(btn, chosen) {
 
     setTimeout(() => {
       btn.classList.remove('wrong');
-      btn.style.opacity = '0.3';
-      btn.style.pointerEvents = 'none';
       feedbackEl.innerHTML = '&nbsp;';
       feedbackEl.className = 'feedback';
     }, 1500);
