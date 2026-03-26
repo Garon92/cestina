@@ -9,6 +9,7 @@ const scoreCorrectEl = document.getElementById('scoreCorrect');
 const scoreTotalEl = document.getElementById('scoreTotal');
 const scoreStreakEl = document.getElementById('scoreStreak');
 const btnSkip = document.getElementById('btnSkip');
+const btnSpeak = document.getElementById('btnSpeak');
 const toggleNormal = document.getElementById('toggleNormal');
 const toggleUpper = document.getElementById('toggleUpper');
 
@@ -21,6 +22,13 @@ let upperMode = false;
 
 function applyCase(text) {
   return upperMode ? text.toUpperCase() : text;
+}
+
+function speakSentenceWithoutAnswer() {
+  if (!currentSentence) return;
+  const parts = currentSentence.sentence.split('___');
+  const withoutWord = (parts[0] || '').trim() + ' ... ' + (parts[1] || '').trim();
+  speak(applyCase(withoutWord), 0.85);
 }
 
 function nextRound() {
@@ -58,13 +66,12 @@ function renderOptions() {
 
 function handleAnswer(btn, chosen) {
   if (locked) return;
-  locked = true;
-  total++;
 
   const isCorrect = chosen === currentSentence.answer;
-  const allBtns = optionsEl.querySelectorAll('.btn');
 
   if (isCorrect) {
+    locked = true;
+    total++;
     correct++;
     streak++;
     btn.classList.add('correct');
@@ -75,29 +82,29 @@ function handleAnswer(btn, chosen) {
     const filled = currentSentence.sentence.replace('___', currentSentence.answer);
     speak(applyCase(filled), 0.85);
 
-    sentenceDisplay.innerHTML =
-      `<span>${applyCase(currentSentence.sentence.replace('___', ''))}</span>`.replace(
-        applyCase(currentSentence.answer),
-        `<span class="sentence-filled">${applyCase(currentSentence.answer)}</span>`
-      );
     const parts = currentSentence.sentence.split('___');
     sentenceDisplay.innerHTML =
       `<span>${applyCase(parts[0])}</span>` +
       `<span class="sentence-filled">${applyCase(currentSentence.answer)}</span>` +
       `<span>${applyCase(parts[1] || '')}</span>`;
+
+    updateScore();
+    saveModuleScore('vety', 1, 1, streak);
+    setTimeout(nextRound, 2000);
   } else {
     streak = 0;
     btn.classList.add('wrong');
-    feedbackEl.textContent = `Špatně – správně je ${applyCase(currentSentence.answer)}`;
+    feedbackEl.textContent = 'To není správně – zkus to znovu!';
     feedbackEl.className = 'feedback wrong-text';
-    allBtns.forEach(b => {
-      if (b.dataset.word === currentSentence.answer) b.classList.add('correct');
-    });
-  }
 
-  updateScore();
-  saveModuleScore('vety', isCorrect ? 1 : 0, 1, streak);
-  setTimeout(nextRound, 2000);
+    setTimeout(() => {
+      btn.classList.remove('wrong');
+      btn.style.opacity = '0.3';
+      btn.style.pointerEvents = 'none';
+      feedbackEl.innerHTML = '&nbsp;';
+      feedbackEl.className = 'feedback';
+    }, 800);
+  }
 }
 
 function updateScore() {
@@ -116,6 +123,7 @@ function setMode(upper) {
   }
 }
 
+btnSpeak.addEventListener('click', speakSentenceWithoutAnswer);
 toggleNormal.addEventListener('click', () => setMode(false));
 toggleUpper.addEventListener('click', () => setMode(true));
 
