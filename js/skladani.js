@@ -28,10 +28,15 @@ let mistakes = 0;
 
 const SKLADANI_WORDS = [
   'pes', 'les', 'nos', 'ves', 'dům', 'sůl', 'míč', 'klíč',
+  'had', 'med', 'led', 'lev', 'sob', 'rak', 'sýr', 'myš',
   'auto', 'kolo', 'ryba', 'žába', 'voda', 'hora', 'mrak', 'vlak',
+  'sova', 'koza', 'drak', 'dort', 'osel', 'hrad', 'most', 'kost',
   'kočka', 'liška', 'kniha', 'škola', 'tráva', 'kráva', 'máma', 'táta',
   'strom', 'medvěd', 'jablko', 'slunce', 'květina', 'motýl', 'zajíc',
-  'balón', 'ptáček', 'hvězda', 'srdce', 'sníh',
+  'balón', 'ptáček', 'hvězda', 'srdce', 'sníh', 'ovce', 'holub',
+  'rohlík', 'banán', 'jahoda', 'koláč', 'párek', 'ježek', 'robot',
+  'lampa', 'zámek', 'komín', 'batoh', 'tunel', 'hruška', 'jelen',
+  'svetr', 'bunda', 'budík', 'raketa', 'potok', 'kopec', 'penál',
 ];
 
 const pickSkladaniWord = createNoRepeatPicker(SKLADANI_WORDS);
