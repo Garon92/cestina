@@ -37,6 +37,10 @@ const SKLADANI_WORDS = [
   'rohlík', 'banán', 'jahoda', 'koláč', 'párek', 'ježek', 'robot',
   'lampa', 'zámek', 'komín', 'batoh', 'tunel', 'hruška', 'jelen',
   'svetr', 'bunda', 'budík', 'raketa', 'potok', 'kopec', 'penál',
+  'čáp', 'vrána', 'losos', 'krtek', 'meč', 'štít', 'věž',
+  'skála', 'louka', 'brána', 'chléb', 'meloun', 'salát',
+  'malina', 'okurka', 'jogurt', 'pilka', 'kostel', 'maják',
+  'kytara', 'flétna', 'sešit', 'tabule', 'poklad', 'ostrov',
 ];
 
 const pickSkladaniWord = createNoRepeatPicker(SKLADANI_WORDS);
