@@ -16,13 +16,14 @@ let total = 0;
 let streak = 0;
 let locked = false;
 let currentWord = null;
+const pickWord = createNoRepeatPicker(WORDS);
 
 function nextRound() {
   locked = false;
   feedbackEl.innerHTML = '&nbsp;';
   feedbackEl.className = 'feedback';
 
-  currentWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+  currentWord = pickWord();
 
   wordDisplay.textContent = currentWord.word.toUpperCase();
   setTimeout(() => speak(currentWord.word, 0.8), 300);

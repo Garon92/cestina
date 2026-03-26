@@ -34,6 +34,8 @@ const SKLADANI_WORDS = [
   'balón', 'ptáček', 'hvězda', 'srdce', 'sníh',
 ];
 
+const pickSkladaniWord = createNoRepeatPicker(SKLADANI_WORDS);
+
 function applyCase(text) {
   return upperMode ? text.toUpperCase() : text.toLowerCase();
 }
@@ -44,7 +46,7 @@ function nextRound() {
   feedbackEl.innerHTML = '&nbsp;';
   feedbackEl.className = 'feedback';
 
-  currentWord = SKLADANI_WORDS[Math.floor(Math.random() * SKLADANI_WORDS.length)];
+  currentWord = pickSkladaniWord();
   letters = currentWord.split('');
 
   renderHint();

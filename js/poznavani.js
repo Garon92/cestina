@@ -16,6 +16,7 @@ let total = 0;
 let streak = 0;
 let locked = false;
 let currentAnswer = null;
+const pickLetter = createNoRepeatPicker(QUIZ_LETTERS);
 
 /* true = show uppercase, pick matching lowercase.
    false = show lowercase, pick matching uppercase. */
@@ -28,7 +29,7 @@ function nextRound() {
 
   showUpper = Math.random() < 0.5;
 
-  const target = QUIZ_LETTERS[Math.floor(Math.random() * QUIZ_LETTERS.length)];
+  const target = pickLetter();
   currentAnswer = target;
 
   if (showUpper) {

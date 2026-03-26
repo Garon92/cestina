@@ -19,6 +19,7 @@ let streak = 0;
 let locked = false;
 let currentSentence = null;
 let upperMode = false;
+const pickSentence = createNoRepeatPicker(SENTENCES);
 
 function applyCase(text) {
   return upperMode ? text.toUpperCase() : text;
@@ -36,7 +37,7 @@ function nextRound() {
   feedbackEl.innerHTML = '&nbsp;';
   feedbackEl.className = 'feedback';
 
-  currentSentence = SENTENCES[Math.floor(Math.random() * SENTENCES.length)];
+  currentSentence = pickSentence();
 
   renderSentence();
   renderOptions();

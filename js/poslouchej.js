@@ -16,6 +16,7 @@ let total = 0;
 let streak = 0;
 let locked = false;
 let currentAnswer = null;
+const pickLetter = createNoRepeatPicker(QUIZ_LETTERS);
 
 /* Randomly show upper or lower in the choices */
 let showUpper = true;
@@ -26,7 +27,7 @@ function nextRound() {
   feedbackEl.className = 'feedback';
   showUpper = Math.random() < 0.5;
 
-  const target = QUIZ_LETTERS[Math.floor(Math.random() * QUIZ_LETTERS.length)];
+  const target = pickLetter();
   currentAnswer = target;
 
   roundInfoEl.textContent = 'Poslechni si písmenko a vyber správné';
