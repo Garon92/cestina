@@ -97,13 +97,16 @@ function handleAnswer(btn, chosen) {
     feedbackEl.textContent = 'To není správně – zkus to znovu!';
     feedbackEl.className = 'feedback wrong-text';
 
+    const wrongFilled = currentSentence.sentence.replace('___', chosen);
+    speak(applyCase(wrongFilled), 0.85);
+
     setTimeout(() => {
       btn.classList.remove('wrong');
       btn.style.opacity = '0.3';
       btn.style.pointerEvents = 'none';
       feedbackEl.innerHTML = '&nbsp;';
       feedbackEl.className = 'feedback';
-    }, 800);
+    }, 1500);
   }
 }
 
