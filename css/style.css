@@ -488,6 +488,95 @@ a { color: var(--gold); text-decoration: none; }
   font-weight: 800;
 }
 
+/* ── Skládání game ── */
+
+.top-bar-controls {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.word-hint {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--gold);
+  text-align: center;
+  margin: 8px 0;
+  letter-spacing: 0.12em;
+  min-height: 2.6rem;
+  text-shadow: 0 0 20px var(--gold-glow);
+}
+
+.word-hint.hint-hidden {
+  visibility: hidden;
+}
+
+.build-area {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 16px 0;
+  min-height: 64px;
+}
+
+.build-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 56px;
+  border-radius: 10px;
+  border: 2px dashed var(--gold-dim);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--gray);
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.build-slot.filled {
+  color: var(--green);
+  border-color: var(--green);
+  border-style: solid;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.pool-area {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 500px;
+  margin: 10px 0;
+}
+
+.pool-letter {
+  font-size: 1.8rem;
+  min-width: 52px;
+  min-height: 56px;
+  padding: 8px 12px;
+  transition: all 0.15s;
+}
+
+.pool-letter.used {
+  opacity: 0.2;
+  pointer-events: none;
+  transform: scale(0.85);
+}
+
+.pool-letter.wrong {
+  animation: poolShake 0.4s ease;
+}
+
+@keyframes poolShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
 /* ── Round counter ── */
 
 .round-info {
@@ -502,6 +591,7 @@ a { color: var(--gold); text-decoration: none; }
 @media (max-width: 600px) {
   .letter-display { font-size: 4.5rem; }
   .word-display { font-size: 2.5rem; }
+  .word-hint { font-size: 1.8rem; }
   .sentence-display { font-size: 1.4rem; }
   .options-grid .btn { font-size: 1.6rem; min-height: 68px; }
   .options-words .btn { font-size: 1.1rem; min-height: 54px; }
@@ -514,6 +604,11 @@ a { color: var(--gold); text-decoration: none; }
   .letter-detail-big { font-size: 5rem; }
   .letter-detail-small { font-size: 3rem; }
   .letter-detail-inner { padding: 28px 24px; }
+  .build-slot { width: 40px; height: 48px; font-size: 1.5rem; }
+  .pool-letter { font-size: 1.5rem; min-width: 44px; min-height: 48px; }
+  .pool-area { gap: 8px; }
+  .top-bar-controls { gap: 6px; }
+  .top-bar-controls .btn { padding: 6px 10px; font-size: 0.8rem; }
 }
 
 @media (max-width: 380px) {

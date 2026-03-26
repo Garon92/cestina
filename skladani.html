@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skládání – Čeština pro Adámka</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="index.html" class="btn-back">← Menu</a>
+    <span class="page-title">Složi slovo</span>
+    <div class="top-bar-controls">
+      <div class="view-toggle" style="margin-bottom:0">
+        <button class="btn active" data-mode="lower" id="toggleLower">abc</button>
+        <button class="btn" data-mode="upper" id="toggleUpper">ABC</button>
+      </div>
+      <div class="view-toggle" style="margin-bottom:0">
+        <button class="btn active" data-mode="hidden" id="toggleHidden">🙈</button>
+        <button class="btn" data-mode="shown" id="toggleShown">👁️</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-area">
+    <div class="round-info" id="roundInfo">Poslechni si slovo a slož ho z písmenek</div>
+
+    <button class="btn btn-primary btn-speaker-sm" id="btnSpeak">🔊</button>
+
+    <div class="word-hint" id="wordHint"></div>
+
+    <div class="build-area" id="buildArea"></div>
+
+    <p class="feedback" id="feedback">&nbsp;</p>
+
+    <div class="pool-area" id="poolArea"></div>
+
+    <div class="score-bar">
+      <span>Správně: <span class="value" id="scoreCorrect">0</span></span>
+      <span>Pokusy: <span class="value" id="scoreTotal">0</span></span>
+      <span>Série: <span class="value" id="scoreStreak">0</span></span>
+    </div>
+
+    <button class="btn btn-primary" id="btnSkip" style="margin-top: 14px;">Přeskočit (Esc)</button>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/skladani.js"></script>
+
+</body>
+</html>
