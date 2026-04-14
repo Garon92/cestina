@@ -70,21 +70,6 @@ function stopSpeaking() {
   }
 }
 
-function speakTypedText(text, rate = 0.85) {
-  if (!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'cs-CZ';
-  utterance.rate = rate;
-
-  const voices = speechSynthesis.getVoices();
-  const czVoice = voices.find(voice => voice.lang.startsWith('cs'));
-  if (czVoice) utterance.voice = czVoice;
-
-  speechSynthesis.speak(utterance);
-}
-
 function rememberText(value) {
   const trimmed = value.trim();
   if (!trimmed) return;
@@ -124,7 +109,7 @@ function renderHistory() {
     speakBtn.className = 'btn btn-primary text-history-speak';
     speakBtn.textContent = '🔊';
     speakBtn.setAttribute('aria-label', `Přečíst uložený text: ${item}`);
-    speakBtn.addEventListener('click', () => speakTypedText(item, 0.85));
+    speakBtn.addEventListener('click', () => speak(item, 0.85));
 
     row.append(loadBtn, speakBtn);
     textHistory.appendChild(row);
@@ -167,7 +152,7 @@ caseButtons.forEach(btn => {
 btnSpeak.addEventListener('click', () => {
   const value = textInput.value.trim();
   if (!value) return;
-  speakTypedText(value, 0.85);
+  speak(value, 0.85);
 });
 
 btnClear.addEventListener('click', clearText);
