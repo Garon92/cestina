@@ -89,6 +89,10 @@ function playHistoryAt(index) {
   speak(item, 0.85);
 }
 
+function getHistoryShortcutLabel(index) {
+  return index === 9 ? '0' : String(index + 1);
+}
+
 function getHistoryIndexForCode(code) {
   const topRowMap = {
     Digit1: 0,
@@ -187,8 +191,17 @@ function renderHistory() {
 
     const label = document.createElement('div');
     label.className = 'text-history-label';
-    label.textContent = convertTextCase(item);
-    label.title = item;
+    label.title = `${getHistoryShortcutLabel(index)}: ${item}`;
+
+    const shortcut = document.createElement('span');
+    shortcut.className = 'text-history-key';
+    shortcut.textContent = getHistoryShortcutLabel(index);
+
+    const text = document.createElement('span');
+    text.className = 'text-history-text';
+    text.textContent = convertTextCase(item);
+
+    label.append(shortcut, text);
 
     const speakBtn = document.createElement('button');
     speakBtn.type = 'button';

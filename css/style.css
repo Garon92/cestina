@@ -539,7 +539,7 @@ a { color: var(--gold); text-decoration: none; }
 .text-history-item {
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 8px;
   align-items: stretch;
 }
 
@@ -550,18 +550,18 @@ a { color: var(--gold); text-decoration: none; }
 }
 
 .text-history-move {
-  min-width: 38px;
-  min-height: 26px;
+  min-width: 32px;
+  min-height: 24px;
   padding: 0;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   line-height: 1;
 }
 
 .text-history-delete {
-  min-width: 52px;
+  min-width: 42px;
   min-height: 58px;
   padding: 0;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #ffcfbf;
   border-color: #8f4e3e;
   background: rgba(143, 78, 62, 0.14);
@@ -576,7 +576,8 @@ a { color: var(--gold); text-decoration: none; }
   min-height: 58px;
   display: flex;
   align-items: center;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 12px 14px;
   border-radius: var(--radius);
   border: 1px solid #333;
   background: rgba(17, 17, 28, 0.8);
@@ -584,6 +585,28 @@ a { color: var(--gold); text-decoration: none; }
   font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.35;
+  word-break: break-word;
+}
+
+.text-history-key {
+  flex: 0 0 auto;
+  min-width: 1.8rem;
+  height: 1.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(240, 192, 64, 0.15);
+  border: 1px solid rgba(240, 192, 64, 0.35);
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.text-history-text {
+  min-width: 0;
+  flex: 1 1 auto;
   word-break: break-word;
 }
 
@@ -786,9 +809,10 @@ a { color: var(--gold); text-decoration: none; }
   .text-primary-action { flex-direction: column; gap: 10px; }
   .text-history { padding: 14px; }
   .text-history-item { grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 8px; }
-  .text-history-move { min-width: 34px; min-height: 24px; }
-  .text-history-delete { min-width: 46px; min-height: 52px; font-size: 1rem; }
-  .text-history-label { min-height: 52px; padding: 12px 14px; font-size: 0.98rem; }
+  .text-history-move { min-width: 28px; min-height: 22px; font-size: 0.78rem; }
+  .text-history-delete { min-width: 38px; min-height: 52px; font-size: 0.92rem; }
+  .text-history-label { min-height: 52px; gap: 8px; padding: 10px 12px; font-size: 0.98rem; }
+  .text-history-key { min-width: 1.55rem; height: 1.55rem; font-size: 0.76rem; }
   .text-history-speak { min-width: 52px; min-height: 52px; }
   .text-history-actions { justify-content: center; }
   .text-clear-row { justify-content: center; }
