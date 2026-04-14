@@ -585,7 +585,8 @@ a { color: var(--gold); text-decoration: none; }
   width: 100%;
   display: flex;
   justify-content: flex-end;
-  padding-top: 6px;
+  padding-top: 2px;
+  padding-bottom: 6px;
 }
 
 .btn-clear {
