@@ -493,6 +493,10 @@ a { color: var(--gold); text-decoration: none; }
   text-shadow: 0 0 20px var(--gold-glow);
 }
 
+.text-preview.empty {
+  display: none;
+}
+
 .text-input {
   width: 100%;
   min-height: 150px;
@@ -514,16 +518,90 @@ a { color: var(--gold); text-decoration: none; }
   box-shadow: 0 0 0 4px rgba(240, 192, 64, 0.12);
 }
 
-.text-input::placeholder {
-  color: #666;
-}
-
-.text-actions {
+.text-primary-action {
+  width: 100%;
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.text-action-note {
+  color: var(--gray);
+  font-size: 0.95rem;
+}
+
+.text-history {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid #2d2d46;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.text-history-title {
+  color: var(--gray);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.text-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.text-history-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.text-history-load {
+  min-height: 58px;
+  justify-content: flex-start;
+  padding: 14px 16px;
+  color: var(--white);
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: left;
+  word-break: break-word;
+}
+
+.text-history-speak {
+  min-width: 64px;
+  min-height: 58px;
+  padding: 0;
+}
+
+.text-clear-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 6px;
+}
+
+.btn-clear {
+  min-width: auto;
+  min-height: auto;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ead8a8;
+  border-color: #7a6733;
+  background: rgba(122, 103, 51, 0.12);
+}
+
+.btn-clear:hover {
+  background: rgba(122, 103, 51, 0.22);
+  border-color: var(--gold-dim);
 }
 
 .btn:disabled {
@@ -671,6 +749,11 @@ a { color: var(--gold); text-decoration: none; }
   .sentence-display { font-size: 1.4rem; }
   .text-preview { font-size: 1.5rem; min-height: 112px; padding: 18px 14px; }
   .text-input { font-size: 1.1rem; min-height: 136px; padding: 16px; }
+  .text-primary-action { flex-direction: column; gap: 10px; }
+  .text-history { padding: 14px; }
+  .text-history-item { grid-template-columns: 1fr; }
+  .text-history-speak { width: 100%; }
+  .text-clear-row { justify-content: center; }
   .options-grid .btn { font-size: 1.6rem; min-height: 68px; }
   .options-words .btn { font-size: 1.1rem; min-height: 54px; }
   .letter-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }

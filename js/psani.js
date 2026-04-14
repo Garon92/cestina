@@ -8,8 +8,30 @@ const btnSpeak = document.getElementById('btnSpeak');
 const btnClear = document.getElementById('btnClear');
 const roundInfo = document.getElementById('roundInfo');
 const caseButtons = document.querySelectorAll('.text-case-toggle .btn');
+const textHistoryWrap = document.getElementById('textHistoryWrap');
+const textHistory = document.getElementById('textHistory');
+
+const HISTORY_STORAGE_KEY = 'cestina_recent_texts';
+const MAX_HISTORY_ITEMS = 5;
 
 let caseMode = 'upper';
+let recentTexts = loadRecentTexts();
+
+function loadRecentTexts() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY));
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(item => typeof item === 'string' && item.trim())
+      .slice(0, MAX_HISTORY_ITEMS);
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentTexts() {
+  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(recentTexts));
+}
 
 function convertTextCase(value) {
   return caseMode === 'upper'
@@ -24,12 +46,15 @@ function setTextValue(value) {
 function updateUi() {
   const value = textInput.value.trim();
 
-  textPreview.textContent = value || convertTextCase('Sem napiš, co chceš přečíst');
+  textPreview.textContent = value;
+  textPreview.classList.toggle('empty', !value);
   btnSpeak.disabled = !value;
   btnClear.disabled = !textInput.value;
   roundInfo.textContent = value
     ? 'Klikni na reproduktor a text se přečte'
-    : 'Napiš slovo nebo větu a klikni na reproduktor';
+    : recentTexts.length
+      ? 'Napiš něco nového nebo si pusť něco z historie'
+      : 'Napiš slovo nebo větu a klikni na reproduktor';
 }
 
 function applyCaseToCurrentText() {
@@ -37,6 +62,7 @@ function applyCaseToCurrentText() {
   const end = textInput.selectionEnd;
   setTextValue(textInput.value);
   textInput.setSelectionRange(start, end);
+  renderHistory();
   updateUi();
 }
 
@@ -46,7 +72,54 @@ function stopSpeaking() {
   }
 }
 
+function rememberText(value) {
+  const trimmed = value.trim();
+  if (!trimmed) return;
+
+  recentTexts = [
+    trimmed,
+    ...recentTexts.filter(item => item !== trimmed)
+  ].slice(0, MAX_HISTORY_ITEMS);
+
+  saveRecentTexts();
+  renderHistory();
+}
+
+function fillFromHistory(value) {
+  setTextValue(value);
+  updateUi();
+  textInput.focus();
+}
+
+function renderHistory() {
+  textHistory.innerHTML = '';
+  textHistoryWrap.hidden = recentTexts.length === 0;
+
+  recentTexts.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'text-history-item';
+
+    const loadBtn = document.createElement('button');
+    loadBtn.type = 'button';
+    loadBtn.className = 'btn text-history-load';
+    loadBtn.textContent = convertTextCase(item);
+    loadBtn.title = 'Vrátit text do pole';
+    loadBtn.addEventListener('click', () => fillFromHistory(item));
+
+    const speakBtn = document.createElement('button');
+    speakBtn.type = 'button';
+    speakBtn.className = 'btn btn-primary text-history-speak';
+    speakBtn.textContent = '🔊';
+    speakBtn.setAttribute('aria-label', `Přečíst uložený text: ${item}`);
+    speakBtn.addEventListener('click', () => speak(item, 0.85));
+
+    row.append(loadBtn, speakBtn);
+    textHistory.appendChild(row);
+  });
+}
+
 function clearText() {
+  rememberText(textInput.value);
   textInput.value = '';
   stopSpeaking();
   updateUi();
@@ -90,5 +163,6 @@ document.addEventListener('keydown', e => {
   }
 });
 
+renderHistory();
 updateUi();
 textInput.focus();

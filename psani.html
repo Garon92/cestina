@@ -22,20 +22,28 @@
         <button class="btn" data-case="lower">malá</button>
       </div>
 
-      <div class="text-preview" id="textPreview">SEM NAPIŠ, CO CHCEŠ PŘEČÍST</div>
+      <div class="text-preview empty" id="textPreview" aria-live="polite"></div>
 
       <textarea
         id="textInput"
         class="text-input"
         rows="5"
-        placeholder="Sem napiš, co chceš přečíst"
         aria-label="Text k přečtení"
         spellcheck="false"
       ></textarea>
 
-      <div class="text-actions">
-        <button class="btn btn-primary btn-speaker-sm" id="btnSpeak" aria-label="Přečíst text">🔊</button>
-        <button class="btn" id="btnClear">Vymazat</button>
+      <div class="text-primary-action">
+        <button class="btn btn-primary btn-speaker-sm" id="btnSpeak" type="button" aria-label="Přečíst text">🔊</button>
+        <span class="text-action-note">Ctrl+Enter text přečte</span>
+      </div>
+
+      <div class="text-history" id="textHistoryWrap" hidden>
+        <div class="text-history-title">Posledních 5 textů</div>
+        <div class="text-history-list" id="textHistory"></div>
+      </div>
+
+      <div class="text-clear-row">
+        <button class="btn btn-clear" id="btnClear" type="button">Vymazat pole</button>
       </div>
     </div>
   </div>
