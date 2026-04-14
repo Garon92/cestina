@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piš a poslouchej – Čeština pro Adámka</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="index.html" class="btn-back">← Menu</a>
+    <span class="page-title">Piš a poslouchej</span>
+  </div>
+
+  <div class="main-area">
+    <div class="round-info" id="roundInfo">Napiš slovo nebo větu a klikni na reproduktor</div>
+
+    <div class="text-playground card">
+      <div class="view-toggle text-case-toggle">
+        <button class="btn active" data-case="upper">VELKÁ</button>
+        <button class="btn" data-case="lower">malá</button>
+      </div>
+
+      <div class="text-preview" id="textPreview">SEM NAPIŠ, CO CHCEŠ PŘEČÍST</div>
+
+      <textarea
+        id="textInput"
+        class="text-input"
+        rows="5"
+        placeholder="Sem napiš, co chceš přečíst"
+        aria-label="Text k přečtení"
+        spellcheck="false"
+      ></textarea>
+
+      <div class="text-actions">
+        <button class="btn btn-primary btn-speaker-sm" id="btnSpeak" aria-label="Přečíst text">🔊</button>
+        <button class="btn" id="btnClear">Vymazat</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/psani.js"></script>
+
+</body>
+</html>

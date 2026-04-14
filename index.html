@@ -56,6 +56,13 @@
         key: 'slova'
       },
       {
+        href: 'psani.html',
+        icon: '⌨️',
+        label: 'Piš a poslouchej',
+        desc: 'Napiš cokoli a nech si to přečíst',
+        trackProgress: false
+      },
+      {
         href: 'vety.html',
         icon: '✏️',
         label: 'Věty',
@@ -74,10 +81,12 @@
     const grid = document.getElementById('menuGrid');
 
     modules.forEach(m => {
-      const stars = getModuleStars(m.key);
-      const starsHtml = Array.from({ length: 3 }, (_, i) =>
-        `<span class="star-icon ${i < stars ? 'earned' : 'empty'}">${i < stars ? '⭐' : '☆'}</span>`
-      ).join('');
+      const stars = m.trackProgress === false ? 0 : getModuleStars(m.key);
+      const starsHtml = m.trackProgress === false
+        ? ''
+        : `<div class="progress-stars">${Array.from({ length: 3 }, (_, i) =>
+            `<span class="star-icon ${i < stars ? 'earned' : 'empty'}">${i < stars ? '⭐' : '☆'}</span>`
+          ).join('')}</div>`;
 
       const card = document.createElement('a');
       card.href = m.href;
@@ -86,7 +95,7 @@
         <span class="icon">${m.icon}</span>
         <span class="label">${m.label}</span>
         <span class="desc">${m.desc}</span>
-        <div class="progress-stars">${starsHtml}</div>
+        ${starsHtml}
       `;
       grid.appendChild(card);
     });
