@@ -3,9 +3,9 @@
    ══════════════════════════════════════════════ */
 
 const textInput = document.getElementById('textInput');
-const textPreview = document.getElementById('textPreview');
 const btnSpeak = document.getElementById('btnSpeak');
 const btnClear = document.getElementById('btnClear');
+const btnClearHistory = document.getElementById('btnClearHistory');
 const roundInfo = document.getElementById('roundInfo');
 const caseButtons = document.querySelectorAll('.text-case-toggle .btn');
 const textHistoryWrap = document.getElementById('textHistoryWrap');
@@ -46,8 +46,6 @@ function setTextValue(value) {
 function updateUi() {
   const value = textInput.value.trim();
 
-  textPreview.textContent = value;
-  textPreview.classList.toggle('empty', !value);
   btnSpeak.disabled = !value;
   btnClear.disabled = !textInput.value;
   roundInfo.textContent = value
@@ -141,6 +139,13 @@ function clearText() {
   textInput.focus();
 }
 
+function clearHistory() {
+  recentTexts = [];
+  saveRecentTexts();
+  renderHistory();
+  updateUi();
+}
+
 textInput.addEventListener('input', () => {
   const start = textInput.selectionStart;
   const end = textInput.selectionEnd;
@@ -166,6 +171,7 @@ btnSpeak.addEventListener('click', () => {
 });
 
 btnClear.addEventListener('click', clearText);
+btnClearHistory.addEventListener('click', clearHistory);
 
 document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {

@@ -22,8 +22,6 @@
         <button class="btn" data-case="lower">malá</button>
       </div>
 
-      <div class="text-preview empty" id="textPreview" aria-live="polite"></div>
-
       <textarea
         id="textInput"
         class="text-input"
@@ -44,6 +42,9 @@
       <div class="text-history" id="textHistoryWrap" hidden>
         <div class="text-history-title">Posledních 5 textů</div>
         <div class="text-history-list" id="textHistory"></div>
+        <div class="text-history-actions">
+          <button class="btn btn-clear-all" id="btnClearHistory" type="button">Vymazat vše</button>
+        </div>
       </div>
     </div>
   </div>
