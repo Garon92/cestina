@@ -204,8 +204,7 @@ function renderHistory() {
 
 function saveCurrentText() {
   rememberText(textInput.value);
-  updateUi();
-  textInput.focus();
+  clearInput();
 }
 
 function clearInput() {
