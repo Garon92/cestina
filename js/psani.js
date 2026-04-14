@@ -89,13 +89,31 @@ function playHistoryAt(index) {
   speak(item, 0.85);
 }
 
-function getHistoryIndexForKey(key) {
-  if (key === '0') return 9;
+function getHistoryIndexForCode(code) {
+  const topRowMap = {
+    Digit1: 0,
+    Digit2: 1,
+    Digit3: 2,
+    Digit4: 3,
+    Digit5: 4,
+    Digit6: 5,
+    Digit7: 6,
+    Digit8: 7,
+    Digit9: 8,
+    Digit0: 9,
+    Numpad1: 0,
+    Numpad2: 1,
+    Numpad3: 2,
+    Numpad4: 3,
+    Numpad5: 4,
+    Numpad6: 5,
+    Numpad7: 6,
+    Numpad8: 7,
+    Numpad9: 8,
+    Numpad0: 9
+  };
 
-  const numeric = Number.parseInt(key, 10);
-  if (numeric >= 1 && numeric <= 9) return numeric - 1;
-
-  return null;
+  return Object.hasOwn(topRowMap, code) ? topRowMap[code] : null;
 }
 
 function isTypingTarget(target) {
@@ -237,8 +255,8 @@ document.addEventListener('keydown', e => {
     btnSpeak.click();
   }
 
-  if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && !isTypingTarget(document.activeElement)) {
-    const index = getHistoryIndexForKey(e.key);
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && !isTypingTarget(document.activeElement)) {
+    const index = getHistoryIndexForCode(e.code);
     if (index !== null && index < recentTexts.length) {
       playHistoryAt(index);
     }
