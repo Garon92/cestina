@@ -4,7 +4,7 @@
 
 const textInput = document.getElementById('textInput');
 const btnSpeak = document.getElementById('btnSpeak');
-const btnSave = document.getElementById('btnSave');
+const btnSave = document.getElementById('btnSave') || document.getElementById('btnClear');
 const btnClearHistory = document.getElementById('btnClearHistory');
 const roundInfo = document.getElementById('roundInfo');
 const caseButtons = document.querySelectorAll('.text-case-toggle .btn');
@@ -47,7 +47,7 @@ function updateUi() {
   const value = textInput.value.trim();
 
   btnSpeak.disabled = !value;
-  btnSave.disabled = !textInput.value;
+  if (btnSave) btnSave.disabled = !textInput.value;
   roundInfo.textContent = value
     ? 'Klikni na reproduktor a text se přečte'
     : recentTexts.length
@@ -258,8 +258,13 @@ btnSpeak.addEventListener('click', () => {
   speak(value, 0.85);
 });
 
-btnSave.addEventListener('click', saveCurrentText);
-btnClearHistory.addEventListener('click', clearHistory);
+if (btnSave) {
+  btnSave.addEventListener('click', saveCurrentText);
+}
+
+if (btnClearHistory) {
+  btnClearHistory.addEventListener('click', clearHistory);
+}
 
 document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
