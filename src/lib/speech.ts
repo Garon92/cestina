@@ -113,7 +113,8 @@ class SpeechEngine {
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)
       .map<VoiceInfo>(({ v, score }) => ({ uri: v.voiceURI, name: v.name, lang: v.lang, local: v.localService, score }));
-    this.set({ voices: cz, status: cz.length ? 'ready' : this.state.status === 'loading' ? 'loading' : 'no-czech' });
+    // Seznam hlasů je načtený, ale český v něm není → hned to víme (když se později objeví, přepne se na ready).
+    this.set({ voices: cz, status: cz.length ? 'ready' : 'no-czech' });
     if (cz.length) this.set({ activeVoice: this.pickVoice()?.voiceURI ?? '' });
   }
 
@@ -175,6 +176,8 @@ class SpeechEngine {
     this.set({ caption: { text: opts.caption ?? text, at: Date.now() } });
     if (!clean) return Promise.resolve();
     if (!this.synth || this.state.status === 'unsupported') return wait(Math.min(2500, 400 + clean.length * 60));
+    // Hlasy existují, ale žádný český → prohlížeč by četl anglicky („bé“ jako „bee“). Radši jen titulek.
+    if (this.state.status === 'no-czech' && this.allVoices.length > 0) return wait(Math.min(2500, 400 + clean.length * 60));
     const synth = this.synth;
     const my = ++this.seq;
     try {

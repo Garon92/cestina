@@ -166,6 +166,11 @@ describe('generátory', () => {
     expect(isPhoneticWord('vtip')).toBe(false);
     expect(isPhoneticWord('čepice')).toBe(false); // pi
     expect(isPhoneticWord('žába')).toBe(true);
+    expect(isPhoneticWord('paprika')).toBe(false); // ri × ry
+    expect(isPhoneticWord('srdce')).toBe(false); // [srtce]
+    expect(isPhoneticWord('bonbón')).toBe(false); // [bombón]
+    expect(isPhoneticWord('řízek')).toBe(true);
+    expect(isPhoneticWord('zajíc')).toBe(true);
     const t = genDiktat(ctx({ count: 8 }));
     expect(t).toHaveLength(8);
     for (const x of t) {

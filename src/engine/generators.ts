@@ -426,8 +426,10 @@ export function genSkladani(ctx: GenContext): SkladaniTask[] {
 }
 
 const VOICED = new Set(['b', 'd', 'ď', 'g', 'v', 'z', 'ž', 'h']);
-const VOICELESS = new Set(['p', 't', 'ť', 'k', 'f', 's', 'š', 'ch']);
-const OBOJETNE = new Set(['b', 'f', 'l', 'm', 'p', 's', 'v', 'z']);
+const VOICELESS = new Set(['p', 't', 'ť', 'k', 'f', 's', 'š', 'ch', 'c', 'č']);
+const VOWELS = new Set([...'aáeéěiíoóuúůyý']);
+/** Po měkkých souhláskách se píše vždy i/í – to dítě zvládne bez pravidel. */
+const MEKKE = new Set(['ž', 'š', 'č', 'ř', 'c', 'j', 'ď', 'ť', 'ň']);
 
 /**
  * Slovo se píše, jak se vyslovuje (vhodné na diktát pro začátečníky):
@@ -441,9 +443,12 @@ export function isPhoneticWord(word: string): boolean {
   for (let i = 0; i < L.length; i++) {
     const c = L[i]!;
     const prev = L[i - 1];
-    if ((c === 'i' || c === 'í') && prev && (OBOJETNE.has(prev) || prev === 'd' || prev === 't' || prev === 'n')) return false;
+    // i/í jen po měkké souhlásce nebo samohlásce (po tvrdých/obojetných by se dítě muselo rozhodovat i × y).
+    if ((c === 'i' || c === 'í') && prev && !MEKKE.has(prev) && !VOWELS.has(prev)) return false;
     const next = L[i + 1];
     if (next && ((VOICED.has(c) && VOICELESS.has(next)) || (VOICELESS.has(c) && VOICED.has(next) && next !== 'v'))) return false;
+    // n před b/p zní jako m (bonbón → [bombón]).
+    if (c === 'n' && (next === 'b' || next === 'p')) return false;
   }
   const last = L[L.length - 1]!;
   if (VOICED.has(last)) return false;

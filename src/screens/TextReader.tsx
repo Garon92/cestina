@@ -153,7 +153,7 @@ export function TextReader() {
             requestAnimationFrame(() => el.setSelectionRange(s, en));
           }}
           style={{ fontSize: script ? 'clamp(1.4rem, 5vw, 2rem)' : 'clamp(1.6rem, 6vw, 2.6rem)', fontWeight: 900, lineHeight: script ? 1.8 : 1.3, minHeight: '8rem' }}
-          placeholder={mode === 'upper' ? 'MÁMA MÁ MÍČ' : 'máma má míč'}
+          placeholder={mode === 'upper' ? 'SEM PIŠ…' : 'sem piš…'}
         />
         <div className="flex flex-wrap items-center gap-3 mt-3">
           <button
