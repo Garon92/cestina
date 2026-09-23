@@ -113,7 +113,7 @@ export const ACTIVITIES: readonly ActivityMeta[] = [
     level: 'slabiky',
     title: 'Slyšíš slabiku?',
     desc: 'MA, ME, MI… poslouchej a najdi',
-    icon: '👂',
+    icon: '🎧',
     intro: 'Poslouchej a najdi slabiku.',
     size: same,
     needsVoice: true,

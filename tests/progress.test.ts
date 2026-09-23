@@ -157,3 +157,11 @@ describe('migrace a doporučení', () => {
     for (const id of plan) expect(ACTIVITY_BY_ID.get(id)!.needsVoice ?? false).toBe(false);
   });
 });
+
+describe('ikony aktivit', () => {
+  it('každá aktivita má jinou ikonu (dítě nečte názvy) – CESTINA-23', async () => {
+    const { ACTIVITIES } = await import('../src/engine/meta');
+    const icons = ACTIVITIES.map((a) => a.icon);
+    expect(new Set(icons).size).toBe(icons.length);
+  });
+});
