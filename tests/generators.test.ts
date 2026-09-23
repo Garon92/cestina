@@ -69,6 +69,18 @@ describe('generátory', () => {
     expect(r).toBeGreaterThan(200 / 41 * 2);
   });
 
+  it('všechny generátory zvládnou i malou sadu písmen a krátké/dlouhé sezení', () => {
+    const gens = [genPoznavani, genPoslouchej, genParovani, genHledej, genZacina, genObtahuj, genSlabiky, genCtiSlabiky, genSkladejSlabiky, genCtiSlova, genSlova, genSkladani, genDiktat, genRymy, genVety, genPravda];
+    for (const letters of [['A', 'M', 'E', 'L'], ['A', 'M', 'E', 'L', 'I', 'O', 'P', 'S', 'T', 'U'], LETTER_KEYS]) {
+      for (const count of [1, 5, 15]) {
+        for (const g of gens) {
+          const out = g(ctx({ letters, count, rng: mulberry32(count * 7 + letters.length) }));
+          expect(out.length, `${g.name} ${letters.length} ${count}`).toBe(count);
+        }
+      }
+    }
+  });
+
   it('focus písmeno je první', () => {
     expect(genObtahuj(ctx({ focus: 'Ž' }))[0]!.letter).toBe('Ž');
     expect(genObtahuj(ctx({ focus: 'Ž', letterCase: 'lower' }))[0]!.char).toBe('ž');
