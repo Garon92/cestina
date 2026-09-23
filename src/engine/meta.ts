@@ -218,6 +218,87 @@ export function isActivityId(id: string): id is ActivityId {
   return ACTIVITY_BY_ID.has(id as ActivityId);
 }
 
+/** Míchanice – sezení složené z úloh různých cviček (není v přehledu úrovní). */
+export type SessionId = ActivityId | 'mix';
+
+export const MIX_META: ActivityMeta & { id: 'mix' } = {
+  id: 'mix' as never,
+  level: 'pismena',
+  title: 'Míchanice',
+  desc: 'Každá úloha je jiná',
+  icon: '🎲',
+  intro: 'Míchanice! Každá úloha je jiná.',
+  size: (n) => Math.max(6, Math.min(n + 2, 16)),
+} as ActivityMeta & { id: 'mix' };
+
+export function isSessionId(id: string): id is SessionId {
+  return id === 'mix' || isActivityId(id);
+}
+
+export function sessionMeta(id: SessionId): ActivityMeta {
+  return id === 'mix' ? MIX_META : ACTIVITY_BY_ID.get(id)!;
+}
+
+/** Barva úrovně pro aktivitu (Míchanice má barvu aplikace). */
+export function levelColor(id: SessionId): string {
+  if (id === 'mix') return '#8b5cf6';
+  const lvl = ACTIVITY_BY_ID.get(id)?.level;
+  return LEVELS.find((l) => l.id === lvl)?.color ?? 'var(--accent)';
+}
+
+/**
+ * Plán Míchanice: pořadí cvičení bez dvou stejných za sebou. Přednost mají cvičení z úrovně, kde dítě
+ * zrovna je (nejnižší úroveň, kde ještě nemá 3 hvězdy), občas přijde i něco lehčího nebo těžšího.
+ */
+export function planMix(
+  stats: Record<string, { bestStars: number } | undefined>,
+  count: number,
+  rng: () => number,
+): ActivityId[] {
+  const levelIndex = new Map(LEVELS.map((l, i) => [l.id, i]));
+  const levelOf = (id: ActivityId) => levelIndex.get(ACTIVITY_BY_ID.get(id)!.level) ?? 0;
+  const open = MIX_POOL.filter((id) => (stats[id]?.bestStars ?? 0) < 3).map(levelOf);
+  const focus = open.length ? Math.min(...open) : LEVELS.length - 1;
+  const weight = (id: ActivityId) => {
+    const d = Math.abs(levelOf(id) - focus);
+    return d === 0 ? 3 : d === 1 ? 1.2 : 0.35;
+  };
+  const out: ActivityId[] = [];
+  while (out.length < count) {
+    const last = out[out.length - 1];
+    const cands = MIX_POOL.filter((id) => id !== last);
+    const total = cands.reduce((s, id) => s + weight(id), 0);
+    let r = rng() * total;
+    let pick = cands[cands.length - 1]!;
+    for (const id of cands) {
+      r -= weight(id);
+      if (r <= 0) {
+        pick = id;
+        break;
+      }
+    }
+    out.push(pick);
+  }
+  return out;
+}
+
+/** Aktivity vhodné do Míchanice (krátké úlohy, bez obtahování a diktátu). */
+export const MIX_POOL: readonly ActivityId[] = [
+  'poslouchej',
+  'poznavani',
+  'zacina',
+  'hledej',
+  'slabiky',
+  'cti-slabiky',
+  'skladej-slabiky',
+  'cti-slova',
+  'slova',
+  'skladani',
+  'rymy',
+  'pravda',
+  'vety',
+];
+
 /**
  * Doporučená další aktivita: nejnižší úroveň, ve které je něco nehrané nebo pod 3 hvězdami,
  * přednost má to, co se nehrálo nejdéle.

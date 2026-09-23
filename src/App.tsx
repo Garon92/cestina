@@ -1,7 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { Modal } from './components/Modal';
 import { CaseSwitch, SpeechCaption } from './components/ui';
-import { isActivityId } from './engine/meta';
+import { isSessionId } from './engine/meta';
 import { greeting, h, setHelp } from './kit';
 import { navigate, useRoute } from './lib/router';
 import { say, speech } from './lib/speech';
@@ -88,7 +88,7 @@ export function App() {
   let screen: React.ReactNode;
   let title = 'Čeština pro Adámka';
   if (!head) screen = <Home onVoiceHelp={() => setVoiceHelp(true)} />;
-  else if (head === 'hra' && rest[0] && isActivityId(rest[0])) {
+  else if (head === 'hra' && rest[0] && isSessionId(rest[0])) {
     screen = <Session key={`${rest[0]}-${route.query.get('pismeno') ?? ''}`} id={rest[0]} focus={route.query.get('pismeno') ?? undefined} />;
   } else if (head === 'abeceda') {
     screen = <Alphabet />;

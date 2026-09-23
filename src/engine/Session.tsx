@@ -7,8 +7,8 @@ import { mulberry32 } from '../lib/random';
 import { navigate } from '../lib/router';
 import { say, speech } from '../lib/speech';
 import { getProgress, updateProgress, useAppSettings } from '../lib/store';
-import { ACTIVITY_BY_ID, LEVELS, recommend, type ActivityId } from './meta';
-import { REGISTRY } from './registry';
+import { ACTIVITY_BY_ID, levelColor, recommend, type SessionId } from './meta';
+import { sessionDef } from './registry';
 import { Results } from './Results';
 import type { LetterResult, ReviewItem, TaskApi } from './types';
 
@@ -17,13 +17,9 @@ const PRAISE = ['Výborně!', 'Správně!', 'Super!', 'Paráda!', 'Skvěle!', 'B
 /** Denní počet vyřešených úloh + série dní (kit) – čte ho i menu („Dnes procvičeno“). */
 const daily = createDaily('cestina', { goal: 24 });
 
-export function levelColor(id: ActivityId): string {
-  const lvl = ACTIVITY_BY_ID.get(id)?.level;
-  return LEVELS.find((l) => l.id === lvl)?.color ?? 'var(--accent)';
-}
 
-export function Session({ id, focus }: { id: ActivityId; focus?: string }) {
-  const def = REGISTRY[id];
+export function Session({ id, focus }: { id: SessionId; focus?: string }) {
+  const def = sessionDef(id);
   const settings = useAppSettings();
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1e9));
   const tasks = useMemo(
@@ -222,7 +218,7 @@ export function Session({ id, focus }: { id: ActivityId; focus?: string }) {
   const lvl = levelColor(id);
 
   if (result) {
-    const recommended = recommend(getProgress().activities, id);
+    const recommended = recommend(getProgress().activities, id === 'mix' ? undefined : id);
     return (
       <div className="play" style={{ ['--lvl' as string]: lvl }}>
         <Results

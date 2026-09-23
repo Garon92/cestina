@@ -15,13 +15,13 @@ a nálepkami. Běží na tabletu, telefonu i počítači a funguje i offline (PW
 | 📖 Slova | Co je napsáno? · Velká a malá slova · Skládání · Rýmy · Diktát (klávesnice s háčky a čárkami) |
 | 📝 Věty | Pravda, nebo ne? · Doplň slovo |
 
-K tomu **Abeceda** (všech 42 písmen s výslovností a obrázkem), **Piš a poslouchej** (napiš cokoli a aplikace to
+K tomu **Míchanice** 🎲 (úlohy z různých cvičení podle toho, kde dítě zrovna je), **Abeceda** (všech 42 písmen s výslovností a obrázkem), **Piš a poslouchej** (napiš cokoli a aplikace to
 přečte, historie 10 textů, klávesy 1–0), **album nálepek**, přehled **Co už umím** (postup po písmenech) a
 **nastavení pro rodiče** (hlas, rychlost řeči, délka cvičení, výběr procvičovaných písmen, tolerance obtahování).
 
 - Písmo: VELKÁ TISKACÍ / malá tiskací / psací (font Playwrite CZ) – přepínač je v každém cvičení.
 - Každé cvičení = sezení o 5–15 úlohách → hvězdičky (1–3), nálepka, přehled chyb s poslechem.
-- Adaptivní výběr: častěji písmena, ve kterých dítě chybuje; „umím“ = 5 z posledních 6 pokusů správně.
+- Adaptivní výběr: častěji písmena, ve kterých dítě chybuje; písmeno je „umím“, když aspoň 80 % z posledních (min. 5) pokusů bylo správně napoprvé.
 - Bez českého hlasu aplikace funguje dál a ukazuje titulky (co by řekla), s návodem, jak hlas doinstalovat.
 
 ## Vývoj

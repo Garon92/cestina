@@ -5,7 +5,23 @@ import {
 } from '../src/lib/progress';
 import { STICKERS } from '../src/data/stickers';
 import { mulberry32 } from '../src/lib/random';
-import { recommend } from '../src/engine/meta';
+import { ACTIVITY_BY_ID, MIX_POOL, planMix, recommend } from '../src/engine/meta';
+
+describe('Míchanice', () => {
+  it('střídá cvičení a drží se aktuální úrovně', () => {
+    const plan = planMix({}, 200, mulberry32(9));
+    expect(plan).toHaveLength(200);
+    for (let i = 1; i < plan.length; i++) expect(plan[i]).not.toBe(plan[i - 1]);
+    for (const id of plan) expect(MIX_POOL).toContain(id);
+    const letters = plan.filter((id) => ACTIVITY_BY_ID.get(id)!.level === 'pismena').length;
+    expect(letters).toBeGreaterThan(200 * 0.35);
+    // Když má dítě písmenka hotová, těžiště se posune ke slabikám.
+    const done = Object.fromEntries(MIX_POOL.filter((id) => ACTIVITY_BY_ID.get(id)!.level === 'pismena').map((id) => [id, { bestStars: 3 }]));
+    const plan2 = planMix(done, 200, mulberry32(9));
+    const syl = plan2.filter((id) => ACTIVITY_BY_ID.get(id)!.level === 'slabiky').length;
+    expect(syl).toBeGreaterThan(200 * 0.3);
+  });
+});
 
 const NOW = new Date(2026, 8, 23, 17, 0).getTime();
 

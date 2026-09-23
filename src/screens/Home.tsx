@@ -71,12 +71,26 @@ export function Home({ onVoiceHelp }: { onVoiceHelp: () => void }) {
           </a>
         </div>
 
-        <a className="g92-btn g92-btn--xl mt-5 w-full sm:w-auto" href={href(`hra/${rec.id}`)} style={{ minHeight: 72, fontSize: '1.4rem' }}>
-          <span aria-hidden="true" style={{ fontSize: '1.8rem' }}>
-            ▶
-          </span>
-          Hrát: {rec.title}
-        </a>
+        <div className="flex flex-wrap gap-3 mt-5">
+          <a className="g92-btn g92-btn--xl w-full sm:w-auto" href={href(`hra/${rec.id}`)} style={{ minHeight: 72, fontSize: '1.4rem' }}>
+            <span aria-hidden="true" style={{ fontSize: '1.8rem' }}>
+              ▶
+            </span>
+            Hrát: {rec.title}
+          </a>
+          <a
+            className="g92-btn g92-btn--secondary g92-btn--xl w-full sm:w-auto"
+            href={href('hra/mix')}
+            style={{ minHeight: 72, fontSize: '1.3rem' }}
+            title="Úlohy z různých cvičení"
+          >
+            <span aria-hidden="true" style={{ fontSize: '1.7rem' }}>
+              🎲
+            </span>
+            Míchanice
+            {p.activities.mix?.bestStars ? <MiniStars n={p.activities.mix.bestStars} /> : null}
+          </a>
+        </div>
         <div aria-hidden="true" className="hidden sm:block absolute -right-3 -top-4 text-[7rem] opacity-15 rotate-12 select-none pointer-events-none">
           🔤
         </div>
