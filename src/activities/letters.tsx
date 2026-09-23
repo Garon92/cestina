@@ -176,7 +176,7 @@ function ZacinaView({ task, api }: { task: ZacinaTask; api: TaskApi }) {
   const first = task.letter === 'CH' ? w.slice(0, 2) : w.slice(0, 1);
   return (
     <>
-      <button type="button" className="tile tile--pic" style={{ width: 'min(15rem, 55vw)' }} onClick={() => void say(task.word)} aria-label={`Obrázek: ${task.word}. Ťukni a uslyšíš slovo.`}>
+      <button type="button" className="tile tile--pic tile--hero" style={{ width: 'min(15rem, 50vw, 30vh)' }} onClick={() => void say(task.word)} aria-label={`Obrázek: ${task.word}. Ťukni a uslyšíš slovo.`}>
         <EmojiPic e={task.emoji} label={task.word} />
       </button>
       <div className={`prompt-word ${script}`} aria-live="polite" style={{ minHeight: '1.2em' }}>

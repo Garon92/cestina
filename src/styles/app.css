@@ -223,6 +223,12 @@ body {
 .tile--pic {
   aspect-ratio: 1;
   font-size: clamp(3rem, 12vw, 5.5rem);
+  /* Jemně tónované pozadí – bílé obrázky (mrak, vejce, vločka) jinak splývají. */
+  background: color-mix(in oklab, var(--lvl) 7%, var(--g92-surface));
+}
+
+.tile--pic.tile--hero {
+  font-size: clamp(5rem, 24vmin, 9rem);
 }
 
 .tile .tile-caption {
@@ -649,7 +655,7 @@ body {
 
 .trace-wrap {
   position: relative;
-  width: min(100%, 34rem);
+  width: min(100%, 44rem);
   aspect-ratio: 1 / 1.05;
   max-height: calc(100dvh - var(--g92-appbar-total, 60px) - 16rem);
   border-radius: var(--g92-radius-2xl);

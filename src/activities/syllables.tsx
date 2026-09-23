@@ -26,11 +26,11 @@ function SlabikyView({ task, api }: { task: SlabikyTask; api: TaskApi }) {
       <SpeakButton text={task.syl} caption={`„${task.syl}“`} size={120} label="Poslechnout slabiku znovu" />
       <ChoiceGrid
         api={api}
-        variant="word"
+        variant="letter"
         answer={task.syl}
         sayOnCorrect={task.syl}
         sayOnWrong={(id) => `To je ${id}. Hledáme ${task.syl}.`}
-        options={task.options.map((s) => ({ id: s, label: s, className: `${script} tile--letter`, content: caseWord(s, api.mode) }))}
+        options={task.options.map((s) => ({ id: s, label: s, className: script, content: caseWord(s, api.mode) }))}
       />
     </>
   );
