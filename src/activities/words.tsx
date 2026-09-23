@@ -180,7 +180,8 @@ export const rymy = defineActivity<RymyTask>({
 
 // ─── Diktát ───────────────────────────────────────────────────────────────
 
-const KB_ROWS = ['abcdefgh', 'ijklmnop', 'rstuvzy'];
+// 6 kláves na řádek = větší klávesy i na telefonu (q, w, x v diktátu nejsou).
+const KB_ROWS = ['abcdef', 'ghijkl', 'mnoprs', 'tuvyz'];
 const CARKA: Record<string, string> = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú', y: 'ý' };
 const HACEK: Record<string, string> = { c: 'č', d: 'ď', e: 'ě', n: 'ň', r: 'ř', s: 'š', t: 'ť', z: 'ž' };
 const KROUZEK: Record<string, string> = { u: 'ů' };
@@ -276,7 +277,7 @@ function DiktatView({ task, api }: { task: DiktatTask; api: TaskApi }) {
           {caseWord(task.word, api.mode)}
         </div>
       ) : null}
-      <div className="slots" aria-live="polite" aria-label={`Napsáno: ${typed || 'nic'}`}>
+      <div className="slots diktat-slots" aria-live="polite" aria-label={`Napsáno: ${typed || 'nic'}`}>
         {Array.from({ length: len }, (_, i) => {
           const ch = shownChars[i];
           const m = marks?.[i];
@@ -299,13 +300,22 @@ function DiktatView({ task, api }: { task: DiktatTask; api: TaskApi }) {
         ))}
         <div className="kbd-row">
           <button type="button" className="kbd-key kbd-key--mod" onClick={() => mark(CARKA)} aria-label="Čárka nad posledním písmenem" title="čárka (á, é, í…)">
-            ´
+            <span className="kbd-mark" aria-hidden="true">´</span>
+            <span className="kbd-example" aria-hidden="true">
+              {caseWord('á', api.mode)}
+            </span>
           </button>
           <button type="button" className="kbd-key kbd-key--mod" onClick={() => mark(HACEK)} aria-label="Háček nad posledním písmenem" title="háček (č, ř, š…)">
-            ˇ
+            <span className="kbd-mark" aria-hidden="true">ˇ</span>
+            <span className="kbd-example" aria-hidden="true">
+              {caseWord('č', api.mode)}
+            </span>
           </button>
           <button type="button" className="kbd-key kbd-key--mod" onClick={() => mark(KROUZEK)} aria-label="Kroužek nad u" title="kroužek (ů)">
-            °
+            <span className="kbd-mark" aria-hidden="true">°</span>
+            <span className="kbd-example" aria-hidden="true">
+              {caseWord('ů', api.mode)}
+            </span>
           </button>
           <button type="button" className="kbd-key kbd-key--wide" onClick={back} aria-label="Smazat poslední písmeno">
             ⌫

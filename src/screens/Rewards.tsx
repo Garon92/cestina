@@ -1,4 +1,4 @@
-import { MiniStars, SpeakButton } from '../components/ui';
+import { MiniStars, SpeakButton, HomeLink } from '../components/ui';
 import { ALPHABET, LETTER_KEYS } from '../data/alphabet';
 import { ALBUMS, STICKERS } from '../data/stickers';
 import { ACTIVITIES, LEVELS } from '../engine/meta';
@@ -11,9 +11,7 @@ import { caseLetter, plural } from '../lib/text';
 
 function Back() {
   return (
-    <a className="g92-btn g92-btn--secondary g92-btn--icon" href={href('')} aria-label="Zpět domů">
-      ←
-    </a>
+    <HomeLink />
   );
 }
 

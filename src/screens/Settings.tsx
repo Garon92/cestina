@@ -1,12 +1,64 @@
 import { useState } from 'react';
-import { CaseSwitch, HoldButton } from '../components/ui';
+import { CaseSwitch, HoldButton, HomeLink } from '../components/ui';
 import { VoiceHelp } from '../components/VoiceHelp';
 import { ALPHABET, LETTER_KEYS, LETTER_PRESETS } from '../data/alphabet';
-import { confirmDialog, openSettingsDialog, setSettings, toast, vocative, KIT_VERSION } from '../kit';
+import { clearActivity, confirmDialog, openSettingsDialog, safeStorage, setSettings, toast, vocative, KIT_VERSION } from '../kit';
 import { emptyProgress } from '../lib/progress';
-import { href } from '../lib/router';
 import { say, speech, useSpeech } from '../lib/speech';
 import { childName, setAppSettings, setProgress, useAppSettings, useG92Settings, useProgress, type TraceTolerance } from '../lib/store';
+
+const NUMBERS: [number, string][] = [
+  [3, 'tři'],
+  [4, 'čtyři'],
+  [5, 'pět'],
+  [6, 'šest'],
+  [7, 'sedm'],
+  [8, 'osm'],
+  [9, 'devět'],
+];
+
+/**
+ * Rodičovská zóna: podržet tlačítko 3 s a pak ťuknout na číslo napsané slovem (dítě, které teprve
+ * čte, to nezvládne náhodou) – CESTINA-21.
+ */
+function ParentGate({ onPass }: { onPass: () => void }) {
+  const [step, setStep] = useState<'hold' | 'number'>('hold');
+  const [task] = useState(() => {
+    const shuffled = [...NUMBERS].sort(() => Math.random() - 0.5);
+    const target = shuffled[0]!;
+    const options = shuffled.slice(0, 4).map(([n]) => n).sort(() => Math.random() - 0.5);
+    return { target, options };
+  });
+  const [wrong, setWrong] = useState(false);
+  if (step === 'hold') return <HoldButton ms={3000} onDone={() => setStep('number')}>Podržte 3 sekundy</HoldButton>;
+  return (
+    <div className="flex flex-col items-center gap-3" role="group" aria-label="Kontrola pro rodiče">
+      <p className="font-bold">
+        Ťukněte na číslo <span className="text-accent-text">{task.target[1]}</span>
+      </p>
+      <div className="flex gap-2">
+        {task.options.map((n) => (
+          <button
+            key={n}
+            type="button"
+            className="g92-btn g92-btn--secondary g92-btn--lg"
+            style={{ minWidth: 64, fontSize: '1.4rem' }}
+            onClick={() => {
+              if (n === task.target[0]) onPass();
+              else {
+                setWrong(true);
+                setStep('hold');
+              }
+            }}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+      {wrong ? <p className="text-sm text-muted">To nebylo ono – zkuste to znovu.</p> : null}
+    </div>
+  );
+}
 
 const TOL: { v: TraceTolerance; label: string }[] = [
   { v: 'easy', label: 'Snadné' },
@@ -40,6 +92,9 @@ export function Settings() {
     });
     if (ok) {
       setProgress(emptyProgress());
+      // Vymazat i to, co z postupu vidí menu: denní počty/série a „naposledy hráno“ (CESTINA-10).
+      safeStorage.removeItem('g92:cestina:daily');
+      clearActivity('cestina');
       toast('Postup smazán.', { variant: 'success' });
     }
   };
@@ -50,9 +105,7 @@ export function Settings() {
   return (
     <div className="screen screen--narrow">
       <div className="flex items-center gap-3 mb-5">
-        <a className="g92-btn g92-btn--secondary g92-btn--icon" href={href('')} aria-label="Zpět domů">
-          ←
-        </a>
+        <HomeLink />
         <h1 className="text-3xl font-black">Nastavení</h1>
       </div>
 
@@ -89,8 +142,8 @@ export function Settings() {
             👨‍👩‍👦
           </p>
           <p className="font-black text-xl">Pro rodiče</p>
-          <p className="text-muted text-sm max-w-[26rem]">Hlas, délka cvičení, výběr písmen a smazání postupu. Pro odemčení podržte tlačítko.</p>
-          <HoldButton onDone={() => setUnlocked(true)}>Podržte pro odemčení</HoldButton>
+          <p className="text-muted text-sm max-w-[26rem]">Hlas, délka cvičení, výběr písmen a smazání postupu. Pro odemčení podržte tlačítko a pak ťukněte na správné číslo.</p>
+          <ParentGate onPass={() => setUnlocked(true)} />
         </section>
       ) : (
         <>
@@ -219,7 +272,10 @@ export function Settings() {
               <span className="g92-label">
                 Procvičovaná písmena ({s.letters.length}/{LETTER_KEYS.length})
               </span>
-              <p className="g92-hint mb-2">Cvičení s písmeny i slovy se přizpůsobí písmenům, která dítě už zná. Slova se berou jen z těchto písmen, pokud jich je dost.</p>
+              <p className="g92-hint mb-2">
+                Cvičení s písmeny, slabikami i slovy se přizpůsobí písmenům, která dítě už zná – slova se berou přednostně z nich, a když jich je
+                málo, přidají se ta s co nejméně neznámými písmeny. Věty, Pravda nebo ne? a Rýmy výběr nepoužívají.
+              </p>
               <div className="flex flex-wrap gap-2 mb-3">
                 {LETTER_PRESETS.map((pr) => (
                   <button

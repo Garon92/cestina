@@ -20,7 +20,6 @@ export const RHYME_GROUPS: readonly RhymeWord[][] = [
   R(['raketa', '🚀'], ['planeta', '🪐'], ['trumpeta', '🎺'], ['kometa', '☄️']),
   R(['hruška', '🍐'], ['muška', '🪰']),
   R(['myška', '🐭'], ['liška', '🦊']),
-  R(['balón', '🎈'], ['citrón', '🍋']),
   R(['čaj', '🍵'], ['tramvaj', '🚋']),
   R(['pták', '🐦'], ['sněhulák', '⛄'], ['tučňák', '🐧']),
   R(['had', '🐍'], ['hrad', '🏰']),

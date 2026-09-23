@@ -1,6 +1,17 @@
 @import 'tailwindcss';
 @import '../kit/tailwind-theme.css';
-@import '@fontsource/playwrite-cz/400.css';
+
+/* Psací písmo (Playwrite CZ – česká školní psací). Vlastní @font-face BEZ unicode-range: CSS z fontsource
+   omezuje rozsah na Latin-1, takže č ř š ž ů… by se kreslila náhradním fontem, i když je soubor obsahuje. */
+@font-face {
+  font-family: 'Playwrite CZ';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url('@fontsource/playwrite-cz/files/playwrite-cz-latin-400-normal.woff2') format('woff2'),
+    url('@fontsource/playwrite-cz/files/playwrite-cz-latin-400-normal.woff') format('woff');
+}
 
 /* ==========================================================================
    Čeština pro Adámka – vlastní komponenty nad g92 kitem.
@@ -372,17 +383,53 @@ body {
 
 .dots {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
+  align-items: center;
   gap: 6px;
+  min-height: 20px;
 }
 
+/* Tečky se zmenšují, ale nikdy se nezalomí do více řádků (CESTINA-15). */
 .dot {
-  width: 14px;
-  height: 14px;
+  flex: 0 1 14px;
+  min-width: 5px;
+  aspect-ratio: 1;
   border-radius: 50%;
   background: var(--g92-surface-3);
   transition: background-color var(--g92-dur-3), transform var(--g92-dur-3) var(--g92-ease-spring);
+}
+
+.progress-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.progress-strip-track {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  min-width: 0;
+}
+
+.progress-strip-seg {
+  flex: 1;
+  border-radius: 3px;
+  background: var(--g92-surface-3);
+}
+
+.progress-strip-seg.is-current { background: var(--lvl); }
+.progress-strip-seg.is-ok { background: var(--g92-success); }
+.progress-strip-seg.is-miss { background: var(--g92-warning); }
+
+.progress-strip-count {
+  font-size: var(--g92-fs-sm);
+  font-weight: var(--g92-fw-black);
+  color: var(--g92-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .dot.is-current {
@@ -395,8 +442,7 @@ body {
     gap: 3px;
   }
   .dot {
-    width: 8px;
-    height: 8px;
+    flex-basis: 10px;
   }
 }
 
@@ -542,11 +588,14 @@ body {
 
 .caption {
   position: fixed;
-  left: 50%;
+  /* left+right+fit-content: široký titulek i na telefonu (left:50 % by ho zúžil na půl obrazovky) */
+  left: 1rem;
+  right: 1rem;
+  margin-inline: auto;
+  width: fit-content;
   bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%);
   z-index: var(--g92-z-toast);
-  max-width: min(36rem, calc(100vw - 2rem));
+  max-width: min(40rem, calc(100vw - 2rem));
   padding: 0.7rem 1.1rem;
   border-radius: 1.2rem;
   background: var(--g92-text);
@@ -561,9 +610,15 @@ body {
   animation: caption-in var(--g92-dur-3) var(--g92-ease-out);
 }
 
+/* Ve cvičení nahoře (pod lištou) – dole by zakryl odpovědi. */
+.caption--top {
+  bottom: auto;
+  top: calc(var(--g92-appbar-total, 60px) + 0.4rem);
+}
+
 @keyframes caption-in {
-  from { opacity: 0; transform: translate(-50%, 10px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from { opacity: 0; translate: 0 10px; }
+  to { opacity: 1; translate: 0 0; }
 }
 
 /* ─── Pochvala po správné odpovědi ──────────────────────────────────────── */
@@ -687,9 +742,9 @@ body {
 
 .kbd {
   display: grid;
-  gap: 6px;
+  gap: 5px;
   width: 100%;
-  max-width: 44rem;
+  max-width: 30rem;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -697,20 +752,20 @@ body {
 .kbd-row {
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .kbd-key {
   flex: 1 1 0;
-  max-width: 3.6rem;
-  min-width: 0;
-  height: clamp(2.9rem, 7.5vh, 3.6rem);
+  max-width: 4.6rem;
+  min-width: 40px;
+  height: clamp(2.9rem, 7vh, 3.6rem);
   border-radius: 0.8rem;
   border: 2px solid var(--g92-border);
   background: var(--g92-surface);
   color: var(--g92-text);
   box-shadow: 0 3px 0 var(--g92-border-strong);
-  font-size: clamp(1.1rem, 4.2vw, 1.6rem);
+  font-size: clamp(1.3rem, 5.4vw, 1.8rem);
   font-weight: var(--g92-fw-black);
   cursor: pointer;
   touch-action: manipulation;
@@ -726,6 +781,23 @@ body {
   border-color: color-mix(in oklab, var(--lvl) 35%, var(--g92-border));
   max-width: 5rem;
   flex-grow: 1.3;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.kbd-mark {
+  font-size: 1.3em;
+  line-height: 1;
+  height: 0.5em;
+  overflow: visible;
+}
+
+.kbd-example {
+  font-size: 0.72em;
+  color: var(--g92-text-muted);
 }
 
 .kbd-key--wide {
@@ -859,6 +931,13 @@ body {
 .mastery-2 { --m: color-mix(in oklab, var(--g92-info) 22%, var(--g92-surface)); }
 .mastery-3 { --m: color-mix(in oklab, var(--g92-success) 30%, var(--g92-surface)); }
 
+/* Stav je poznat i podle okraje, nejen podle výplně; v tmavém režimu je „učím se“ opravdu žluté (CESTINA-20). */
+.letter-cell.mastery-1 { border-color: color-mix(in oklab, #f5b700 55%, var(--g92-border)); }
+.letter-cell.mastery-2 { border-color: color-mix(in oklab, var(--g92-info) 55%, var(--g92-border)); }
+.letter-cell.mastery-3 { border-color: color-mix(in oklab, var(--g92-success) 60%, var(--g92-border)); }
+:root[data-scheme='dark'] .mastery-1 { --m: color-mix(in oklab, #fbbf24 55%, var(--g92-surface)); }
+:root[data-scheme='dark'] .mastery-2 { --m: color-mix(in oklab, #60a5fa 30%, var(--g92-surface)); }
+
 .letter-cell {
   position: relative;
   display: grid;
@@ -893,6 +972,240 @@ body {
 
 /* ─── Drobnosti ────────────────────────────────────────────────────────── */
 
+/* ─── Hlavní tlačítko „Hrát“ (dva řádky – vejde se i na 360 px, CESTINA-06) ─── */
+
+.hero-play {
+  min-height: 76px;
+  white-space: normal;
+  justify-content: flex-start;
+  gap: 0.9rem;
+  padding-inline: 1.2rem 1.8rem;
+}
+
+.hero-play-icon {
+  font-size: 1.8rem;
+}
+
+.hero-play-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.hero-play-main {
+  font-size: 1.5rem;
+  font-weight: var(--g92-fw-black);
+}
+
+.hero-play-sub {
+  font-size: 1rem;
+  font-weight: var(--g92-fw-bold);
+  opacity: 0.92;
+}
+
+/* ─── Hlavička cvičení ─── */
+
+.play-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--g92-space-3);
+}
+
+.play-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.play-dots {
+  flex: 1;
+  min-width: 0;
+}
+
+.play-instr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding-inline: 0.25rem;
+}
+
+.play-instr-text {
+  font-size: var(--g92-fs-xl);
+  font-weight: var(--g92-fw-black);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+@media (min-width: 640px) {
+  .play-instr-text {
+    font-size: 1.5rem;
+  }
+}
+
+/* Úzký telefon: postup na samostatném řádku přes celou šířku, ať je čitelný. */
+@media (max-width: 479px) and (orientation: portrait) {
+  .play-bar {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+  .play-home { order: 0; }
+  .play-skip { order: 1; margin-left: auto; }
+  .play-case { order: 2; }
+  .play-dots { order: 3; flex-basis: 100%; }
+  .play-head { gap: 0.6rem; }
+}
+
+.play-stage:focus {
+  outline: none;
+}
+
+.tile--hero {
+  width: min(15rem, 50vw, 30vh);
+}
+
+.pair-tile {
+  aspect-ratio: auto;
+  min-height: clamp(3.6rem, 10.5vh, 5.2rem);
+  font-size: clamp(2rem, 7vh, 3.3rem);
+}
+
+/* ─── Telefon na šířku (844×390): zadání vlevo, odpovědi vpravo, kompaktní hlavička (CESTINA-02) ─── */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .play {
+    padding-top: 0.35rem;
+    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.35rem;
+  }
+  .play-head {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .play-bar,
+  .play-instr {
+    display: contents;
+  }
+  .play-home { order: 0; }
+  .play-instr-speak {
+    order: 1;
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .play-instr-text {
+    order: 2;
+    flex: 1;
+    min-width: 0;
+    font-size: 1.05rem;
+    text-align: left;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .play-dots { order: 3; flex: 0 1 8rem; }
+  .play-skip { order: 4; }
+  .play-case { order: 5; }
+
+  .play-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.3fr);
+    align-content: center;
+    align-items: center;
+    justify-items: center;
+    column-gap: 1.5rem;
+    row-gap: 0.5rem;
+    grid-auto-flow: row dense;
+  }
+  .play-stage > * { grid-column: 1; }
+  .play-stage > .kbd { grid-row: 1 / span 3; }
+  .play-stage > .choices,
+  .play-stage > .kbd,
+  .play-stage > .slots,
+  .play-stage > .tiles,
+  .play-stage > .hledej-grid { grid-column: 2; }
+  .play-stage > .diktat-slots { grid-column: 1; }
+  .play-stage > .trace-layout,
+  .play-stage > .pairs,
+  .play-stage > .play-stage { grid-column: 1 / -1; width: 100%; }
+
+  .prompt-letter { font-size: min(7rem, 32vh); }
+  .prompt-letter.script { font-size: min(5rem, 24vh); }
+  .prompt-word { font-size: clamp(1.8rem, 11vh, 3.2rem); }
+  .prompt-word.script { font-size: clamp(1.5rem, 9vh, 2.6rem); }
+  .prompt-sentence { font-size: clamp(1.15rem, 6.5vh, 1.9rem); }
+  .prompt-emoji { font-size: min(4rem, 16vh); }
+  .tile--hero { width: min(28vh, 10rem); }
+  .speak-btn { max-width: 26vh; max-height: 26vh; }
+
+  .choices--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .choices .tile--letter,
+  .choices .tile--pic {
+    aspect-ratio: auto;
+    min-height: 0;
+    height: min(30vh, 8rem);
+  }
+  .choices .tile--word {
+    min-height: 0;
+    height: min(19vh, 5rem);
+    font-size: clamp(1.1rem, 6vh, 1.7rem);
+  }
+  .hledej-grid .tile {
+    aspect-ratio: auto;
+    min-height: 0;
+    height: calc((100dvh - var(--g92-appbar-total, 48px) - 7rem) / 3);
+    font-size: min(2.8rem, 9vh) !important;
+  }
+  .pairs {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .pairs-col {
+    flex-direction: row;
+    max-width: none;
+    width: 100%;
+    justify-content: center;
+  }
+  .pair-tile {
+    flex: 1 1 0;
+    max-width: 8rem;
+    min-height: 0;
+    height: calc((100dvh - var(--g92-appbar-total, 48px) - 7.5rem) / 2);
+    font-size: min(3rem, 11vh);
+  }
+  .slot {
+    height: min(12vh, 3.6rem);
+    min-width: min(10vh, 3.2rem);
+    font-size: min(2.2rem, 8vh);
+  }
+  .tiles .tile {
+    min-height: 0 !important;
+    height: min(15vh, 4rem);
+    min-width: min(15vh, 4rem) !important;
+    font-size: min(2.2rem, 8vh) !important;
+  }
+  .kbd-key { height: min(2.9rem, 10.5vh); }
+  .kbd-example { display: none; }
+  .kbd-key--mod .kbd-mark { font-size: 1.6em; height: auto; line-height: 1; margin-top: 0.3em; }
+  .trace-layout .trace-wrap {
+    height: calc(100dvh - var(--g92-appbar-total, 48px) - 5.2rem);
+    min-height: 0;
+    width: auto;
+    max-height: none;
+  }
+  .trace-layout > .flex > p { display: none; }
+  .trace-model { display: none; }
+  .results .big-stars { font-size: 2.6rem; }
+  .results h1 { font-size: 1.6rem; }
+}
+
 .hold-btn {
   position: relative;
   overflow: hidden;
@@ -908,7 +1221,7 @@ body {
 
 .hold-btn.is-holding .hold-fill {
   transform: scaleX(1);
-  transition: transform 1.6s linear;
+  transition: transform var(--hold-ms, 1.6s) linear;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -926,4 +1239,20 @@ html[data-motion='reduce'] .sticker-reveal,
 html[data-motion='reduce'] .big-star.is-on,
 html[data-motion='reduce'] .tile.is-hint {
   animation: none !important;
+}
+
+/* 🏠 Domů na podstránkách – na telefonu jen ikona. */
+.home-link {
+  gap: 0.4rem;
+  padding-inline: 0.8rem 1rem;
+}
+
+@media (max-width: 479px) {
+  .home-link {
+    padding-inline: 0;
+    width: var(--g92-touch);
+  }
+  .home-link-label {
+    display: none;
+  }
 }

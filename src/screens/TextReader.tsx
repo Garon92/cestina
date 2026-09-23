@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { SpeakerIcon } from '../components/ui';
+import { SpeakerIcon, HomeLink } from '../components/ui';
 import { confirmDialog, sfx } from '../kit';
-import { href } from '../lib/router';
 import { say, speech, useSpeech } from '../lib/speech';
-import { setTexts, useTexts } from '../lib/store';
+import { getAppSettings, setAppSettings, setTexts, useTexts } from '../lib/store';
 
 type Mode = 'upper' | 'lower' | 'script';
 const MAX = 10;
@@ -28,7 +27,12 @@ function convert(v: string, m: Mode): string {
 export function TextReader() {
   const texts = useTexts();
   const { speaking } = useSpeech();
-  const [mode, setMode] = useState<Mode>('upper');
+  // Stejné písmo jako ve zbytku aplikace a volba se pamatuje (CESTINA-18).
+  const [mode, setModeState] = useState<Mode>(() => getAppSettings().letterCase);
+  const setMode = (m: Mode) => {
+    setModeState(m);
+    setAppSettings({ letterCase: m });
+  };
   const [value, setValue] = useState('');
   const [playing, setPlaying] = useState<number | 'input' | null>(null);
   const ta = useRef<HTMLTextAreaElement>(null);
@@ -102,9 +106,7 @@ export function TextReader() {
     <div className="screen screen--narrow" style={{ ['--lvl' as string]: '#8b5cf6' }}>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
-          <a className="g92-btn g92-btn--secondary g92-btn--icon" href={href('')} aria-label="Zpět domů">
-            ←
-          </a>
+          <HomeLink />
           <h1 className="text-3xl font-black">Piš a poslouchej</h1>
         </div>
         <div className="g92-segmented" role="group" aria-label="Písmo">

@@ -4,7 +4,7 @@
  */
 import { useSyncExternalStore } from 'react';
 import { createStore, getSettingsSnapshot, subscribeSettings, type G92Settings } from '../kit';
-import { LETTER_KEYS } from '../data/alphabet';
+import { COMMON_LETTERS, LETTER_KEYS } from '../data/alphabet';
 import { emptyProgress, migrateLegacyProgress, type Progress } from './progress';
 import type { LetterCase } from './text';
 
@@ -38,7 +38,8 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   voiceURI: '',
   rate: 0.9,
   sessionLength: 8,
-  letters: [...LETTER_KEYS],
+  // Q, W, X jsou jen v cizích slovech – začátečník je nepotřebuje (CESTINA-14); rodič je může zapnout.
+  letters: COMMON_LETTERS.map((l) => l.key),
   traceTolerance: 'normal',
   captions: false,
   onboarded: false,

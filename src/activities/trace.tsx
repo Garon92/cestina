@@ -24,10 +24,12 @@ function ObtahujView({ task, api }: { task: ObtahujTask; api: TaskApi }) {
         onMistake={(reason) => {
           if (reason === 'off') {
             mistakes.current++;
-            api.mistake();
-            if (mistakes.current === 2) window.setTimeout(() => ref.current?.demo(), 300);
+            // Dítě neumí číst – chybu mu řekneme nahlas a hned ukážeme, jak na to (CESTINA-07).
+            api.mistake({ say: 'Kousek vedle. Zkus to znovu.' });
+            window.setTimeout(() => ref.current?.demo(), 450);
           } else void say('Začni u zelené tečky.');
         }}
+        onLift={() => void say('Pokračuj, kde jsi skončil.')}
         onComplete={() => {
           updateProgress((p) => recordTraced(p, task.letter, Date.now()));
           api.done({ say: `${l.say}. ${l.word}.` });
@@ -55,7 +57,8 @@ export const obtahuj = defineActivity<ObtahujTask>({
   meta: ACTIVITY_BY_ID.get('obtahuj')!,
   generate: genObtahuj,
   Component: ({ task, api }) => <ObtahujView task={task} api={api} />,
-  instruction: (t) => `Obtáhni písmenko ${t.char}`,
+  // Psací tahy zatím nemáme – v psacím režimu se obtahuje tiskací písmenko a řekneme to (CESTINA-19).
+  instruction: (t, mode) => (mode === 'script' ? `Obtáhni tiskací písmenko ${t.char}` : `Obtáhni písmenko ${t.char}`),
   prompt: (t) => letterByKey(t.letter).say,
   letterOf: (t) => t.letter,
   review: (t) => ({ label: t.char, say: letterByKey(t.letter).say }),

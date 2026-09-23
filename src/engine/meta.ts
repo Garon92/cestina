@@ -254,10 +254,12 @@ export function planMix(
   stats: Record<string, { bestStars: number } | undefined>,
   count: number,
   rng: () => number,
+  opts: { noVoice?: boolean } = {},
 ): ActivityId[] {
+  const pool = MIX_POOL.filter((id) => !(opts.noVoice && ACTIVITY_BY_ID.get(id)!.needsVoice));
   const levelIndex = new Map(LEVELS.map((l, i) => [l.id, i]));
   const levelOf = (id: ActivityId) => levelIndex.get(ACTIVITY_BY_ID.get(id)!.level) ?? 0;
-  const open = MIX_POOL.filter((id) => (stats[id]?.bestStars ?? 0) < 3).map(levelOf);
+  const open = pool.filter((id) => (stats[id]?.bestStars ?? 0) < 3).map(levelOf);
   const focus = open.length ? Math.min(...open) : LEVELS.length - 1;
   const weight = (id: ActivityId) => {
     const d = Math.abs(levelOf(id) - focus);
@@ -266,7 +268,7 @@ export function planMix(
   const out: ActivityId[] = [];
   while (out.length < count) {
     const last = out[out.length - 1];
-    const cands = MIX_POOL.filter((id) => id !== last);
+    const cands = pool.filter((id) => id !== last);
     const total = cands.reduce((s, id) => s + weight(id), 0);
     let r = rng() * total;
     let pick = cands[cands.length - 1]!;
@@ -306,8 +308,10 @@ export const MIX_POOL: readonly ActivityId[] = [
 export function recommend(
   stats: Record<string, { bestStars: number; lastPlayed: number; sessions: number } | undefined>,
   exclude?: ActivityId,
+  opts: { noVoice?: boolean } = {},
 ): ActivityId {
-  const candidates = ACTIVITIES.filter((a) => a.id !== exclude);
+  // Bez českého hlasu nedoporučujeme poslechová cvičení (hrát se dají dál z karet) – CESTINA-08.
+  const candidates = ACTIVITIES.filter((a) => a.id !== exclude && !(opts.noVoice && a.needsVoice));
   for (const level of LEVELS) {
     const inLevel = candidates.filter((a) => a.level === level.id);
     const weak = inLevel.filter((a) => (stats[a.id]?.bestStars ?? 0) < 3);

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Modal } from '../components/Modal';
-import { MiniStars, SpeakButton } from '../components/ui';
+import { MiniStars, SpeakButton, HomeLink } from '../components/ui';
 import { ALPHABET, type Letter } from '../data/alphabet';
 import { sfx } from '../kit';
 import { MASTERY_LABEL, letterMastery } from '../lib/progress';
-import { href, navigate } from '../lib/router';
+import { navigate } from '../lib/router';
 import { say } from '../lib/speech';
 import { setAppSettings, useAppSettings, useProgress } from '../lib/store';
 
@@ -53,9 +53,7 @@ export function Alphabet() {
     <div className="screen" style={{ ['--lvl' as string]: '#e0479e' }}>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
-          <a className="g92-btn g92-btn--secondary g92-btn--icon" href={href('')} aria-label="Zpět domů">
-            ←
-          </a>
+          <HomeLink />
           <h1 className="text-3xl font-black">Abeceda</h1>
           <SpeakButton text="Ťukni na písmenko a uslyšíš, jak se jmenuje." size={44} soft />
         </div>

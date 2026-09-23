@@ -92,7 +92,7 @@ export function Builder({
           </span>
         ))}
       </div>
-      <div className="flex flex-wrap justify-center gap-2 sm:gap-3 max-w-[40rem]" role="group" aria-label="Dílky">
+      <div className="tiles flex flex-wrap justify-center gap-2 sm:gap-3 max-w-[40rem]" role="group" aria-label="Dílky">
         {tiles.map((t, i) => (
           <button
             key={i}

@@ -5,8 +5,9 @@ import {
   AMBIGUOUS_NAMES,
   genCtiSlabiky, genCtiSlova, genDiktat, genHledej, genObtahuj, genParovani, genPoslouchej, genPoznavani, genPravda,
   genRymy, genSkladani, genSkladejSlabiky, genSlabiky, genSlova, genVety, genZacina, isPhoneticWord, rhymeTail,
-  similarWords, syllablePool, wordFitsLetters, type GenContext,
+  similarWords, syllablePool, unknownLetters, wordFitsLetters, type GenContext,
 } from '../src/engine/generators';
+import { sameGroup } from '../src/data/words';
 import { emptyProgress, recordLetter } from '../src/lib/progress';
 import { mulberry32 } from '../src/lib/random';
 import { syllabifyWord } from '../src/lib/syllables';
@@ -79,6 +80,34 @@ describe('generátory', () => {
         }
       }
     }
+  });
+
+  it('začátečnická sada písmen omezí i čtecí cvičení (CESTINA-05)', () => {
+    const letters = ['A', 'M', 'E', 'L', 'I', 'O', 'P', 'S', 'T', 'U'];
+    const set = new Set(letters);
+    for (const gen of [genCtiSlova, genCtiSlabiky, genSkladejSlabiky]) {
+      const t = gen(ctx({ letters, count: 60 }));
+      const bad = t.filter((x) => unknownLetters(x.word, set) > 1).length;
+      expect(bad, gen.name).toBe(0);
+      const known = t.filter((x) => unknownLetters(x.word, set) === 0).length;
+      expect(known, gen.name).toBeGreaterThan(0);
+    }
+    // Samohlásky: žádné slovo neobsahuje jen samohlásky → berou se slova s nejméně neznámými písmeny.
+    const vowels = ['A', 'Á', 'E', 'É', 'Ě', 'I', 'Í', 'O', 'Ó', 'U', 'Ú', 'Ů', 'Y', 'Ý'];
+    const vs = new Set(vowels);
+    const words = genCtiSlova(ctx({ letters: vowels, count: 40 }));
+    for (const w of words) expect(unknownLetters(w.word, vs)).toBeLessThanOrEqual(2);
+  });
+
+  it('obrázky ze stejné skupiny se nesejdou (pták × sova, auto × taxík) – CESTINA-09', () => {
+    for (const seed of [1, 2, 3, 4, 5]) {
+      for (const t of genCtiSlova(ctx({ count: 300, rng: mulberry32(seed) }))) {
+        for (const o of t.options) if (o.w !== t.word) expect(sameGroup(o.w, t.word), `${t.word} × ${o.w}`).toBe(false);
+      }
+    }
+    expect(sameGroup('pták', 'sova')).toBe(true);
+    expect(sameGroup('auto', 'taxík')).toBe(true);
+    expect(sameGroup('pes', 'kočka')).toBe(false);
   });
 
   it('focus písmeno je první', () => {

@@ -74,7 +74,7 @@ const RAW: Record<CategoryId, Raw[]> = {
     ['lízátko', '🍭'], ['čokoláda', '🍫'], ['sušenka', '🍪'], ['koláč', '🥧'], ['palačinka', '🥞'],
     ['párek', '🌭'], ['hranolky', '🍟'], ['rýže', '🍚'], ['špagety', '🍝'], ['salát', '🥗'], ['máslo', '🧈'],
     ['sůl', '🧂'], ['čaj', '🍵'], ['kobliha', '🍩'], ['preclík', '🥨'], ['kokos', '🥥'], ['avokádo', '🥑'],
-    ['kaštan', '🌰'], ['dýně', '🎃'],
+    ['kaštan', '🌰'], ['dýně', '🎃'], ['maso', '🍖'],
     ['rohlík'], ['knedlík'], ['řízek'], ['špenát'], ['guláš'], ['limonáda'], ['marmeláda'], ['šlehačka'],
     ['zelí'], ['těstoviny'], ['buchta'], ['jogurt'], ['pudink'], ['tvaroh'], ['malina'], ['borůvka'],
     ['višeň'], ['perníček'], ['mák'], ['hrách'], ['oříšek'], ['kakao'], ['šťáva'], ['vánočka'],
@@ -90,10 +90,10 @@ const RAW: Record<CategoryId, Raw[]> = {
   veci: [
     ['kniha', '📖'], ['tužka', '✏️'], ['pastelka', '🖍️'], ['nůžky', '✂️'], ['batoh', '🎒'], ['deštník', '☂️'],
     ['dárek', '🎁'], ['balón', '🎈'], ['míč', '⚽'], ['kostka', '🎲'], ['medvídek', '🧸'], ['zvonek', '🔔'],
-    ['sešit', '📓'], ['pravítko', '📏'], ['lupa', '🔍'], ['magnet', '🧲'], ['kladivo', '🔨'], ['pilka', '🪚'],
+    ['sešit', '📓'], ['pravítko', '📏'], ['lupa', '🔍'], ['magnet', '🧲'], ['kladivo', '🔨'], ['pila', '🪚'],
     ['šroubovák', '🪛'], ['fotoaparát', '📷'], ['dalekohled', '🔭'], ['dopis', '✉️'], ['noviny', '📰'],
     ['mapa', '🗺️'], ['vlajka', '🚩'], ['baterka', '🔦'], ['štít', '🛡️'], ['diamant', '💎'],
-    ['meč'], ['tabule'], ['penál'], ['kružítko'], ['hrábě'], ['kolečko'], ['píšťalka'], ['ponožka'], ['tunel'],
+    ['pilka'], ['meč'], ['tabule'], ['penál'], ['kružítko'], ['hrábě'], ['kolečko'], ['píšťalka'], ['ponožka'], ['tunel'],
     ['poklad'], ['trůn'], ['panenka'], ['kostky'], ['hračka'], ['guma'], ['lepidlo'], ['papír'],
   ],
   obleceni: [
@@ -114,7 +114,7 @@ const RAW: Record<CategoryId, Raw[]> = {
     ['blesk', '⚡'], ['vločka', '❄️'], ['sněhulák', '⛄'], ['strom', '🌳'], ['tulipán', '🌷'], ['růže', '🌹'],
     ['slunečnice', '🌻'], ['kaktus', '🌵'], ['list', '🍁'], ['hora', '⛰️'], ['sopka', '🌋'], ['ostrov', '🏝️'],
     ['vlna', '🌊'], ['oheň', '🔥'], ['kámen', '🪨'], ['voda', '💧'], ['planeta', '🪐'], ['květina', '🌼'],
-    ['mušle', '🐚'], ['tráva', '🌿'], ['vítr', '🌬️'], ['kometa', '☄️'], ['led', '🧊'], ['zeměkoule', '🌍'],
+    ['mušle', '🐚'], ['palma', '🌴'], ['tráva', '🌿'], ['vítr', '🌬️'], ['kometa', '☄️'], ['led', '🧊'], ['zeměkoule', '🌍'],
     ['les'], ['ves'], ['sníh'], ['potok'], ['jezero'], ['kopec'], ['jeskyně'], ['vodopád'], ['oceán'],
     ['skála'], ['louka'], ['pramen'], ['ledovec'], ['údolí'], ['poušť'], ['sluníčko'], ['řeka'], ['moře'],
     ['písek'], ['bláto'], ['rybník'], ['pole'], ['zahrada'], ['kytka'],
@@ -161,6 +161,44 @@ export const WORDS: readonly Word[] = (Object.keys(RAW) as CategoryId[]).flatMap
     })
     .map(([w, e]) => makeWord(w, e ?? '', cat)),
 );
+
+/**
+ * Skupiny obrázků, které si dítě může splést nebo pojmenovat nadřazeným slovem (🦉 je taky „pták“,
+ * 🚕 je taky „auto“). V obrázkových úlohách se dvě slova ze stejné skupiny nikdy nesejdou (CESTINA-09).
+ */
+export const PICTURE_GROUPS: readonly (readonly string[])[] = [
+  ['pták', 'sova', 'papoušek', 'holub', 'páv', 'plameňák', 'orel', 'labuť', 'tučňák', 'kachna', 'kuře', 'kohout', 'slepice', 'krocan'],
+  ['auto', 'taxík', 'sanitka', 'autobus', 'náklaďák', 'traktor'],
+  ['loď', 'plachetnice', 'kotva'],
+  ['medvěd', 'medvídek', 'panda', 'koala'],
+  ['mrak', 'déšť', 'blesk', 'duha'],
+  ['led', 'vločka', 'sněhulák'],
+  ['hodiny', 'budík'],
+  ['hora', 'sopka', 'ostrov', 'palma'],
+  ['planeta', 'zeměkoule', 'kometa', 'hvězda', 'měsíc', 'slunce'],
+  ['květina', 'tulipán', 'růže', 'slunečnice'],
+  ['máma', 'holka', 'babička', 'princezna', 'víla'],
+  ['táta', 'děda', 'kluk', 'princ', 'čaroděj'],
+  ['brouk', 'beruška', 'moucha', 'komár', 'včela', 'mravenec'],
+  ['dort', 'koláč', 'sušenka', 'kobliha', 'palačinka'],
+  ['voda', 'vlna', 'kapka'],
+  ['kost', 'maso'],
+  ['pila', 'kladivo', 'šroubovák'],
+  ['kniha', 'sešit', 'noviny'],
+  ['tužka', 'pastelka'],
+  ['boty', 'ponožky'],
+  ['pes', 'vlk', 'liška'],
+  ['kočka', 'tygr', 'lev'],
+];
+
+const GROUP_OF = new Map<string, number>();
+PICTURE_GROUPS.forEach((g, i) => g.forEach((w) => GROUP_OF.set(w, i)));
+
+/** Patří dvě slova do stejné skupiny obrázků (dají se splést)? */
+export function sameGroup(a: string, b: string): boolean {
+  const ga = GROUP_OF.get(a);
+  return ga !== undefined && ga === GROUP_OF.get(b);
+}
 
 /** Slova s obrázkem (pro obrázkové úlohy). */
 export const PICTURE_WORDS: readonly Word[] = WORDS.filter((w) => w.e !== '');

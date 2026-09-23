@@ -13,6 +13,8 @@ interface Props {
   tol: number;
   onStroke?: (index: number, total: number) => void;
   onMistake?: (reason: 'off' | 'start') => void;
+  /** Prst zvednut uprostřed tahu (dá se navázat). */
+  onLift?: () => void;
   onComplete?: () => void;
   handleRef?: Ref<TraceHandle>;
   /** Zamknout (po dokončení). */
@@ -27,7 +29,7 @@ const VIEW_BOTTOM = 154;
  * Vykreslí linky jako v sešitě, šedou „cestičku“ písmene, aktuální tah s šipkami a zelenou tečkou,
  * pokrok podél tahu a inkoust dítěte. Vyhodnocuje přes StrokeTracer (tolerance v jednotkách písmene).
  */
-export function TraceCanvas({ char, tol, onStroke, onMistake, onComplete, handleRef, locked }: Props) {
+export function TraceCanvas({ char, tol, onStroke, onMistake, onLift, onComplete, handleRef, locked }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glyph = glyphFor(char);
@@ -364,7 +366,10 @@ export function TraceCanvas({ char, tol, onStroke, onMistake, onComplete, handle
       // Zvednutý prst: rozdělanou práci necháme – dítě může navázat.
       s.tracer.lift();
       if (!s.tracer.hasProgress) s.ink = [];
-      else setMsg('Pokračuj, kde jsi skončil.');
+      else {
+        setMsg('Pokračuj, kde jsi skončil.');
+        onLift?.();
+      }
       draw();
     }
   };

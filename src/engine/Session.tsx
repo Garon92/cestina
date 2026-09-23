@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CaseSwitch, HomeIcon, ProgressDots, SpeakButton } from '../components/ui';
 import { LETTER_KEYS } from '../data/alphabet';
-import { confirmDialog, confetti, createDaily, haptic, recordActivity, sfx, toast } from '../kit';
+import { confetti, createDaily, haptic, recordActivity, sfx, toast } from '../kit';
 import { lettersMasteredRatio, ownedStickerCount, recordLetter, recordSession, starsRatio, type SessionOutcome } from '../lib/progress';
 import { mulberry32 } from '../lib/random';
-import { navigate } from '../lib/router';
-import { say, speech } from '../lib/speech';
+import { navigate, setLeaveGuard } from '../lib/router';
+import { confirmLeave } from './leave';
+import { say, speech, useSpeech } from '../lib/speech';
 import { getProgress, updateProgress, useAppSettings } from '../lib/store';
 import { ACTIVITIES, ACTIVITY_BY_ID, levelColor, recommend, type SessionId } from './meta';
 import { sessionDef } from './registry';
@@ -15,12 +16,13 @@ import type { LetterResult, ReviewItem, TaskApi } from './types';
 const PRAISE = ['Výborně!', 'Správně!', 'Super!', 'Paráda!', 'Skvěle!', 'Bezva!', 'Jupí!', 'Přesně tak!'];
 
 /** Denní počet vyřešených úloh + série dní (kit) – čte ho i menu („Dnes procvičeno“). */
-const daily = createDaily('cestina', { goal: 24 });
-
+export const daily = createDaily('cestina', { goal: 24 });
 
 export function Session({ id, focus }: { id: SessionId; focus?: string }) {
   const def = sessionDef(id);
   const settings = useAppSettings();
+  const { status } = useSpeech();
+  const noVoice = status === 'no-czech' || status === 'unsupported';
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1e9));
   const tasks = useMemo(
     () =>
@@ -32,6 +34,7 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
         now: Date.now(),
         letterCase: settings.letterCase,
         focus,
+        noVoice,
       }),
     // Úlohy se generují jen při startu (a „Znovu“) – ne při změně písma uprostřed cvičení.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,6 +48,11 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
   const seq = useRef(0);
   const streak = useRef(0);
   const bestStreak = useRef(0);
+  /** Přeskočené úlohy, dílčí skóre (Párování) a data pro přehled chyb – po úlohách. */
+  const skipped = useRef<boolean[]>([]);
+  const scores = useRef<(number | undefined)[]>([]);
+  const details = useRef<unknown[]>([]);
+  const stageRef = useRef<HTMLDivElement>(null);
 
   const task = tasks[index];
   const prev = index > 0 ? tasks[index - 1] : undefined;
@@ -68,6 +76,9 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
     setResult(null);
     streak.current = 0;
     bestStreak.current = 0;
+    skipped.current = [];
+    scores.current = [];
+    details.current = [];
   }, [seed, id]);
 
   // Přečíst zadání na začátku každé úlohy.
@@ -83,16 +94,60 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, seed, result]);
 
+  // Klávesnice: po každé nové úloze fokus na první odpověď (ne na <body>) – CESTINA-26.
+  useEffect(() => {
+    if (result) return;
+    const t = window.setTimeout(() => {
+      const stage = stageRef.current;
+      if (!stage || stage.contains(document.activeElement)) return;
+      const ok = ':not([disabled]):not([aria-disabled="true"])';
+      const first =
+        stage.querySelector<HTMLElement>(`[data-choice]${ok}, [data-cell]${ok}, [data-pair]${ok}, [data-tile]${ok}, .kbd-key${ok}`) ??
+        stage.querySelector<HTMLElement>(`button${ok}`);
+      (first ?? stage).focus({ preventScroll: true });
+    }, 60);
+    return () => window.clearTimeout(t);
+  }, [index, seed, result]);
+
+  // Rozehrané cvičení hlídá odchod přes Zpět v prohlížeči / na Androidu (CESTINA-11).
+  const active = !result && (index > 0 || (mistakes[0] ?? 0) > 0 || solved);
+  useEffect(() => {
+    if (!active) return;
+    setLeaveGuard(() => confirmLeave());
+    return () => setLeaveGuard(null);
+  }, [active]);
+
   useEffect(() => () => speech.cancel(), []);
 
   const finish = useCallback(
     (finalMistakes: number[]) => {
       const total = tasks.length;
-      const correct = tasks.filter((_, i) => (finalMistakes[i] ?? 0) === 0).length;
-      const review = tasks.map((t, i) => ((finalMistakes[i] ?? 0) > 0 ? def.review(t) : null)).filter((x): x is ReviewItem => x !== null);
+      let correct = 0;
+      tasks.forEach((_, i) => {
+        if (skipped.current[i]) return;
+        const sc = scores.current[i];
+        correct += sc !== undefined ? sc : (finalMistakes[i] ?? 0) === 0 ? 1 : 0;
+      });
+      correct = Math.round(correct * 100) / 100;
+      const skippedCount = skipped.current.filter(Boolean).length;
+      const review = tasks
+        .map((t, i) => {
+          const sc = scores.current[i];
+          const wrong = skipped.current[i] || (sc !== undefined ? sc < 1 : (finalMistakes[i] ?? 0) > 0);
+          return wrong ? def.review(t, details.current[i]) : null;
+        })
+        .filter((x): x is ReviewItem => x !== null);
       let outcome!: SessionOutcome;
       const p = updateProgress((cur) => {
-        outcome = recordSession(cur, { activityId: id, correct, total, bestStreak: bestStreak.current, now: Date.now(), rng: Math.random });
+        outcome = recordSession(cur, {
+          activityId: id,
+          correct,
+          total,
+          skipped: skippedCount,
+          bestStreak: bestStreak.current,
+          now: Date.now(),
+          rng: Math.random,
+        });
         return outcome.progress;
       });
       recordActivity('cestina', {
@@ -101,8 +156,10 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
         metric: { label: 'Nálepky', value: ownedStickerCount(p) },
         note: def.meta.title,
       });
+      setLeaveGuard(null);
       setResult({ outcome, correct, total, review });
-      sfx.win();
+      if (outcome.stars > 0) sfx.win();
+      else sfx.flip();
       if (outcome.stars === 3) window.setTimeout(() => confetti({ cannons: true }), 350);
       if (outcome.dailyGoalJustReached) {
         window.setTimeout(() => toast('Dnešní cíl splněn! 🏆', { variant: 'success', duration: 4000 }), 1200);
@@ -145,6 +202,8 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
       setSolved(true);
       const my = ++seq.current;
       const miss = mistakes[index] ?? 0;
+      if (opts?.score !== undefined) scores.current[index] = Math.max(0, Math.min(1, opts.score));
+      if (opts?.detail !== undefined) details.current[index] = opts.detail;
       sfx.success();
       haptic('success');
       daily.record();
@@ -177,11 +236,12 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
     },
   };
 
-  /** Přeskočit úlohu (počítá se jako chyba) – pro případ, že dítě neví nebo nefunguje hlas. */
+  /** Přeskočit úlohu – nepočítá se jako vyřešená (za samé přeskakování nejsou hvězdy ani nálepka). */
   const skip = () => {
     if (solved || task === undefined || result) return;
     const snapshot = [...mistakes];
     snapshot[index] = Math.max(1, snapshot[index] ?? 0);
+    skipped.current[index] = true;
     setMistakes(snapshot);
     streak.current = 0;
     const lk = def.letterOf?.(task);
@@ -203,23 +263,15 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
   });
 
   const exit = async () => {
-    if (!result && index > 0) {
-      const ok = await confirmDialog({
-        title: 'Skončit cvičení?',
-        message: 'Rozdělané cvičení se nedokončí. Hvězdičky a nálepka jsou až na konci.',
-        confirmLabel: 'Ano, domů',
-        cancelLabel: 'Hrát dál',
-      });
-      if (!ok) return;
-    }
+    if (active && !(await confirmLeave())) return;
     speech.cancel();
-    navigate('');
+    navigate('', { force: true });
   };
 
   const lvl = levelColor(id);
 
   if (result) {
-    const recommended = recommend(getProgress().activities, id === 'mix' ? undefined : id);
+    const recommended = recommend(getProgress().activities, id === 'mix' ? undefined : id, { noVoice });
     return (
       <div className="play" style={{ ['--lvl' as string]: lvl }}>
         <Results
@@ -244,28 +296,45 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
 
   return (
     <div className="play" style={{ ['--lvl' as string]: lvl }}>
-      <div className="flex items-center gap-2 sm:gap-3">
-        <button type="button" className="g92-btn g92-btn--secondary g92-btn--icon" onClick={() => void exit()} aria-label="Domů" title="Domů">
-          <span style={{ width: 24, height: 24, display: 'grid' }}>
-            <HomeIcon />
-          </span>
-        </button>
-        <div className="flex-1 min-w-0">
-          <ProgressDots states={dotStates} current={index} />
+      <div className="play-head">
+        <div className="play-bar">
+          <button type="button" className="play-home g92-btn g92-btn--secondary g92-btn--icon" onClick={() => void exit()} aria-label="Domů" title="Domů">
+            <span style={{ width: 24, height: 24, display: 'grid' }}>
+              <HomeIcon />
+            </span>
+          </button>
+          <div className="play-dots">
+            <ProgressDots states={dotStates} current={index} />
+          </div>
+          <button
+            type="button"
+            className="play-skip g92-btn g92-btn--ghost g92-btn--icon"
+            onClick={skip}
+            aria-label="Přeskočit úlohu (Esc)"
+            title="Přeskočit úlohu (Esc)"
+            disabled={solved}
+          >
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+              <path d="M3.5 6.2v11.6c0 .8.9 1.2 1.5.7L12 13v4.8c0 .8.9 1.2 1.5.7l7.4-5.8c.5-.4.5-1.1 0-1.5l-7.4-5.8c-.6-.5-1.5-.1-1.5.7V11L5 5.5c-.6-.5-1.5-.1-1.5.7Z" />
+            </svg>
+          </button>
+          <div className="play-case">
+            <CaseSwitch compact />
+          </div>
         </div>
-        <button type="button" className="g92-btn g92-btn--ghost g92-btn--icon" onClick={skip} aria-label="Přeskočit úlohu (Esc)" title="Přeskočit úlohu (Esc)" disabled={solved}>
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
-            <path d="M3.5 6.2v11.6c0 .8.9 1.2 1.5.7L12 13v4.8c0 .8.9 1.2 1.5.7l7.4-5.8c.5-.4.5-1.1 0-1.5l-7.4-5.8c-.6-.5-1.5-.1-1.5.7V11L5 5.5c-.6-.5-1.5-.1-1.5.7Z" />
-          </svg>
-        </button>
-        <CaseSwitch compact />
-      </div>
-      <div className="flex items-center justify-center gap-3 px-1">
-        <SpeakButton text={() => [instruction, promptText(false)].filter(Boolean).join('. ')} size={52} label="Přečíst zadání" caption={def.caption?.(task, mode)} />
-        <h1 className="text-xl sm:text-2xl font-black leading-tight text-balance">{instruction}</h1>
+        <div className="play-instr">
+          <SpeakButton
+            className="play-instr-speak"
+            text={() => [instruction, promptText(false)].filter(Boolean).join('. ')}
+            size={52}
+            label="Přečíst zadání"
+            caption={def.caption?.(task, mode)}
+          />
+          <h1 className="play-instr-text">{instruction}</h1>
+        </div>
       </div>
       <main className="flex flex-1 flex-col">
-        <div key={`${seed}-${index}`} className="play-stage g92-anim-float-in">
+        <div key={`${seed}-${index}`} ref={stageRef} tabIndex={-1} className="play-stage g92-anim-float-in">
           <Comp task={task} api={api} index={index} />
         </div>
       </main>

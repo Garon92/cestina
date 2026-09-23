@@ -33,6 +33,22 @@ describe('hvězdy', () => {
     expect(starsFor(7, 10)).toBe(2);
     expect(starsFor(6, 10)).toBe(2);
     expect(starsFor(2, 10)).toBe(1);
+    // přeskočená víc než polovina → nic (CESTINA-04)
+    expect(starsFor(0, 8, 0)).toBe(0);
+    expect(starsFor(4, 8, 3)).toBe(0);
+    expect(starsFor(1, 8, 4)).toBe(1);
+  });
+  it('za přeskočené cvičení není nálepka, rekord ani den', () => {
+    const p = emptyProgress();
+    const o = recordSession(p, { activityId: 'vety', correct: 0, total: 8, skipped: 8, bestStreak: 0, now: NOW, rng: mulberry32(1) });
+    expect(o.stars).toBe(0);
+    expect(o.sticker).toBeNull();
+    expect(o.isNewSticker).toBe(false);
+    expect(o.isNewBest).toBe(false);
+    expect(o.dailyGoalJustReached).toBe(false);
+    expect(ownedStickerCount(o.progress)).toBe(0);
+    expect(todayCount(o.progress, new Date(NOW))).toBe(0);
+    expect(o.progress.activities.vety!.bestStars).toBe(0);
   });
 });
 
@@ -134,5 +150,10 @@ describe('migrace a doporučení', () => {
       poslouchej: all3, poznavani: all3, parovani: all3, hledej: all3, zacina: all3, obtahuj: all3,
     };
     expect(['slabiky', 'cti-slabiky', 'skladej-slabiky']).toContain(recommend(s));
+  });
+  it('bez hlasu nedoporučí poslechová cvičení a Míchanice je vynechá (CESTINA-08)', () => {
+    expect(recommend({}, undefined, { noVoice: true })).toBe('poznavani');
+    const plan = planMix({}, 100, mulberry32(4), { noVoice: true });
+    for (const id of plan) expect(ACTIVITY_BY_ID.get(id)!.needsVoice ?? false).toBe(false);
   });
 });

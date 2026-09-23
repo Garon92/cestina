@@ -28,6 +28,18 @@ export function HomeIcon() {
   );
 }
 
+/** Návrat na domovskou obrazovku aplikace – 🏠 „Domů“ (liška „‹ Menu“ v liště vede ven z aplikace). */
+export function HomeLink() {
+  return (
+    <a className="g92-btn g92-btn--secondary home-link" href="#/" aria-label="Domů" title="Domů">
+      <span style={{ width: 22, height: 22, display: 'inline-grid' }}>
+        <HomeIcon />
+      </span>
+      <span className="home-link-label">Domů</span>
+    </a>
+  );
+}
+
 // ─── Mluvící tlačítko ─────────────────────────────────────────────────────
 
 export function SpeakButton({
@@ -98,6 +110,22 @@ export function BigStars({ n }: { n: number }) {
 }
 
 export function ProgressDots({ states, current }: { states: ('ok' | 'miss' | 'todo')[]; current: number }) {
+  // Hodně úloh (> 10) = souvislý proužek s počtem; tečky by se na telefonu nevešly (CESTINA-15).
+  if (states.length > 10) {
+    const done = states.filter((s) => s !== 'todo').length;
+    return (
+      <div className="progress-strip" role="progressbar" aria-valuemin={0} aria-valuemax={states.length} aria-valuenow={current} aria-label="Postup cvičením">
+        <div className="progress-strip-track">
+          {states.map((s, i) => (
+            <span key={i} className={`progress-strip-seg ${i === current ? 'is-current' : ''} ${s === 'ok' ? 'is-ok' : s === 'miss' ? 'is-miss' : ''}`} />
+          ))}
+        </div>
+        <span className="progress-strip-count" aria-hidden="true">
+          {Math.min(done + 1, states.length)}/{states.length}
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="dots" role="progressbar" aria-valuemin={0} aria-valuemax={states.length} aria-valuenow={current} aria-label="Postup cvičením">
       {states.map((s, i) => (
@@ -214,18 +242,21 @@ export function SpeechCaption() {
   }, [caption, show]);
   if (!visible || !show) return null;
   return (
-    <div className="caption" role="status" aria-live="polite">
+    <div className={`caption ${route.path[0] === 'hra' ? 'caption--top' : ''}`} role="status" aria-live="polite">
       <span aria-hidden="true">🗣️</span>
       <span>{visible.text}</span>
     </div>
   );
 }
 
+const BANNER_KEY = 'g92:cestina:voice-banner';
+
 export function SpeechBanner({ onHelp }: { onHelp?: () => void }) {
   const { status } = useSpeech();
+  // Zavření si pamatujeme trvale (CESTINA-22); na domovské obrazovce pak zůstane jen malý čip 🔇.
   const [hidden, setHidden] = useState(() => {
     try {
-      return sessionStorage.getItem('cestina:voice-banner') === '0';
+      return localStorage.getItem(BANNER_KEY) === '0';
     } catch {
       return false;
     }
@@ -255,7 +286,7 @@ export function SpeechBanner({ onHelp }: { onHelp?: () => void }) {
         onClick={() => {
           setHidden(true);
           try {
-            sessionStorage.setItem('cestina:voice-banner', '0');
+            localStorage.setItem(BANNER_KEY, '0');
           } catch {
             /* ignore */
           }
@@ -290,6 +321,7 @@ export function HoldButton({ onDone, children, ms = 1600 }: { onDone: () => void
     <button
       type="button"
       className={`g92-btn g92-btn--secondary g92-btn--lg hold-btn ${holding ? 'is-holding' : ''}`}
+      style={{ ['--hold-ms' as string]: `${ms}ms` }}
       onPointerDown={start}
       onPointerUp={stop}
       onPointerLeave={stop}

@@ -120,7 +120,7 @@ function HledejView({ task, api }: { task: HledejTask; api: TaskApi }) {
       void say(`To je ${name(task.cells[i]!)}.`);
     }
   };
-  const hint = api.mistakes >= 3;
+  const hint = api.mistakes >= 2;
   return (
     <>
       <div className="flex items-center gap-4">
@@ -134,7 +134,7 @@ function HledejView({ task, api }: { task: HledejTask; api: TaskApi }) {
           <div className="text-muted font-bold text-sm">nalezeno</div>
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-2 sm:gap-3 w-full max-w-[34rem]" role="group" aria-label="Písmenka">
+      <div className="hledej-grid grid grid-cols-4 gap-2 sm:gap-3 w-full max-w-[34rem]" role="group" aria-label="Písmenka">
         {task.cells.map((c, i) => {
           const isFound = found.includes(i);
           return (
@@ -176,7 +176,7 @@ function ZacinaView({ task, api }: { task: ZacinaTask; api: TaskApi }) {
   const first = task.letter === 'CH' ? w.slice(0, 2) : w.slice(0, 1);
   return (
     <>
-      <button type="button" className="tile tile--pic tile--hero" style={{ width: 'min(15rem, 50vw, 30vh)' }} onClick={() => void say(task.word)} aria-label={`Obrázek: ${task.word}. Ťukni a uslyšíš slovo.`}>
+      <button type="button" className="tile tile--pic tile--hero" onClick={() => void say(task.word)} aria-label={`Obrázek: ${task.word}. Ťukni a uslyšíš slovo.`}>
         <EmojiPic e={task.emoji} label={task.word} />
       </button>
       <div className={`prompt-word ${script}`} aria-live="polite" style={{ minHeight: '1.2em' }}>
@@ -238,7 +238,14 @@ function ParovaniView({ task, api }: { task: ParovaniTask; api: TaskApi }) {
       setMatched(next);
       setSel(null);
       if (next.length === task.left.length) {
-        api.done({ say: 'Všechny páry!', letters: task.left.map((k) => ({ key: k, ok: !missed.includes(k) })) });
+        // Skóre po dvojicích (1 chyba z 5 párů = 80 %, ne celé kolo špatně) – CESTINA-13.
+        const ok = task.left.filter((k) => !missed.includes(k)).length;
+        api.done({
+          say: 'Všechny páry!',
+          letters: task.left.map((k) => ({ key: k, ok: !missed.includes(k) })),
+          score: ok / task.left.length,
+          detail: task.left.filter((k) => missed.includes(k)),
+        });
       } else {
         sfx.pop();
         void say(name(key));
@@ -254,7 +261,7 @@ function ParovaniView({ task, api }: { task: ParovaniTask; api: TaskApi }) {
   };
 
   const col = (side: 'L' | 'R', keys: string[]) => (
-    <div className="flex flex-col gap-2 sm:gap-3 flex-1 max-w-[11rem]" role="group" aria-label={side === 'L' ? 'Velká písmena' : 'Malá písmena'}>
+    <div className="pairs-col flex flex-col gap-2 sm:gap-3 flex-1 max-w-[11rem]" role="group" aria-label={side === 'L' ? 'Velká písmena' : 'Malá písmena'}>
       {keys.map((k) => {
         const isM = matched.includes(k);
         const isSel = sel?.side === side && sel.key === k;
@@ -263,11 +270,8 @@ function ParovaniView({ task, api }: { task: ParovaniTask; api: TaskApi }) {
           <button
             key={k}
             type="button"
-            className={`tile tile--letter ${script} ${isSel ? 'is-selected' : ''} ${bad === `${side}-${k}` ? 'is-wrong' : ''}`}
+            className={`tile tile--letter pair-tile ${script} ${isSel ? 'is-selected' : ''} ${bad === `${side}-${k}` ? 'is-wrong' : ''}`}
             style={{
-              aspectRatio: 'auto',
-              minHeight: 'clamp(3.6rem, 10.5vh, 5.2rem)',
-              fontSize: 'clamp(2rem, 7vh, 3.3rem)',
               ...(isM ? { background: `color-mix(in oklab, ${c} 22%, var(--g92-surface))`, borderColor: c, boxShadow: `0 4px 0 color-mix(in oklab, ${c} 50%, transparent)` } : {}),
             }}
             onClick={() => tap(side, k)}
@@ -288,7 +292,7 @@ function ParovaniView({ task, api }: { task: ParovaniTask; api: TaskApi }) {
   );
 
   return (
-    <div className="flex justify-center gap-6 sm:gap-16 w-full">
+    <div className="pairs flex justify-center gap-6 sm:gap-16 w-full">
       {col('L', task.left)}
       {col('R', task.right)}
     </div>
@@ -301,5 +305,9 @@ export const parovani = defineActivity<ParovaniTask>({
   Component: ({ task, api }) => <ParovaniView task={task} api={api} />,
   instruction: () => 'Spoj velké písmenko s malým',
   prompt: () => '',
-  review: (t) => ({ label: t.left.map((k) => `${L(k).upper}${L(k).lower}`).join(' '), say: t.left.map(name).join(', ') }),
+  // V přehledu jen písmena, která se spletla (ne celé kolo).
+  review: (t, detail) => {
+    const keys = Array.isArray(detail) && detail.length ? (detail as string[]) : t.left;
+    return { label: keys.map((k) => `${L(k).upper}${L(k).lower}`).join(' '), say: keys.map(name).join(', ') };
+  },
 });

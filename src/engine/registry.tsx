@@ -38,7 +38,7 @@ export interface MixTask {
 export const mix: ActivityDef<MixTask> = {
   meta: MIX_META,
   generate: (ctx) =>
-    planMix(ctx.progress.activities, ctx.count, ctx.rng).flatMap((id) => {
+    planMix(ctx.progress.activities, ctx.count, ctx.rng, { noVoice: ctx.noVoice }).flatMap((id) => {
       const [task] = REGISTRY[id].generate({ ...ctx, count: 1 });
       return task === undefined ? [] : [{ id, task }];
     }),

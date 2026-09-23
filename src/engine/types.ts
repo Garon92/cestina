@@ -12,8 +12,11 @@ export interface LetterResult {
 export interface TaskApi {
   /** Dítě zkusilo špatnou odpověď. `say` = co říct (např. název špatného písmene). */
   mistake: (opts?: { say?: string }) => void;
-  /** Úloha vyřešená. `say` = co říct jako odměnu (např. celé slovo), `letters` = výsledky po písmenech. */
-  done: (opts?: { say?: string; letters?: LetterResult[] }) => void;
+  /**
+   * Úloha vyřešená. `say` = co říct jako odměnu (např. celé slovo), `letters` = výsledky po písmenech,
+   * `score` = podíl 0–1 správně napoprvé pro úlohy z více částí (Párování), `detail` = data pro přehled chyb.
+   */
+  done: (opts?: { say?: string; letters?: LetterResult[]; score?: number; detail?: unknown }) => void;
   /** Kolik chyb už v této úloze padlo (po 2 chybách ukazujeme nápovědu). */
   mistakes: number;
   /** Úloha je vyřešená – ovládání zamknout. */
@@ -48,8 +51,8 @@ export interface ActivityDef<T> {
   caption?: (task: T, mode: LetterCase) => string;
   /** Písmeno, kterého se úloha týká (pro postup „umím“). */
   letterOf?: (task: T) => string | undefined;
-  /** Položka do přehledu chyb na konci. */
-  review: (task: T) => ReviewItem;
+  /** Položka do přehledu chyb na konci (`detail` = co úloha předala v `done`). */
+  review: (task: T, detail?: unknown) => ReviewItem;
 }
 
 // Pomocník pro typově bezpečnou registraci.

@@ -15,7 +15,7 @@ import {
 import { RHYME_GROUPS, type RhymeWord } from '../data/rhymes';
 import { SENTENCES, type Sentence } from '../data/sentences';
 import { STATEMENTS, type Statement } from '../data/statements';
-import { PICTURE_WORDS, SINGLE_WORDS, WORDS, type Word } from '../data/words';
+import { PICTURE_WORDS, SINGLE_WORDS, WORDS, sameGroup, type Word } from '../data/words';
 import { letterWeight, type Progress } from '../lib/progress';
 import { cycleSample, levenshtein, pick, sample, shuffle, weightedSample, type Rng } from '../lib/random';
 import { hasSimpleSyllables, syllabifyWord } from '../lib/syllables';
@@ -31,6 +31,8 @@ export interface GenContext {
   letterCase: LetterCase;
   /** Konkrétní písmeno (např. z Abecedy → Obtahuj). */
   focus?: string;
+  /** Zařízení nemá český hlas (Míchanice pak vynechá poslechová cvičení). */
+  noVoice?: boolean;
 }
 
 // ─── pomocné ───
@@ -76,12 +78,30 @@ export function wordFitsLetters(word: string, allowed: ReadonlySet<string>): boo
   return splitLetters(word.replace(/\s+/g, '')).every((ch) => allowed.has(ch.toLocaleUpperCase('cs-CZ')));
 }
 
-/** Omezí seznam slov na ta, která jdou přečíst povolenými písmeny (když jich je dost). */
+/** Kolik různých písmen slova dítě ještě nezná. */
+export function unknownLetters(word: string, allowed: ReadonlySet<string>): number {
+  const miss = new Set(splitLetters(word.replace(/\s+/g, '')).map((ch) => ch.toLocaleUpperCase('cs-CZ')).filter((k) => !allowed.has(k)));
+  return miss.size;
+}
+
+/**
+ * Omezí seznam slov na ta, která jdou přečíst povolenými písmeny. Když jich je málo, přibírá postupně
+ * slova s 1, 2, … neznámými písmeny (ne rovnou všechna slova – CESTINA-05).
+ */
 export function filterByLetters<T extends { w: string }>(list: readonly T[], ctx: GenContext, min = 12): T[] {
   const set = new Set(ctx.letters);
   if (set.size >= ALPHABET.length) return [...list];
-  const f = list.filter((w) => wordFitsLetters(w.w, set));
-  return f.length >= min ? f : [...list];
+  const byUnknown = new Map<number, T[]>();
+  for (const w of list) {
+    const u = unknownLetters(w.w, set);
+    byUnknown.set(u, [...(byUnknown.get(u) ?? []), w]);
+  }
+  const out: T[] = [];
+  for (const u of [...byUnknown.keys()].sort((a, b) => a - b)) {
+    if (out.length >= min) break;
+    out.push(...byUnknown.get(u)!);
+  }
+  return out;
 }
 
 /** Distraktory k písmenu: zaměnitelná písmena + náhodná, bez stejně znějících (i/y). */
@@ -199,6 +219,9 @@ export const AMBIGUOUS_NAMES = new Set([
   'bunda', 'čepice', 'boty', 'telefon', 'počítač', 'plachetnice', 'vlak', 'náklaďák', 'kobliha', 'palačinka', 'hrozny',
   'kaštan', 'pusa', 'máma', 'táta', 'čaroděj', 'hrad', 'fontána', 'batoh', 'dopis', 'kalhoty', 'vrtulník', 'voda',
   'králík', 'rak', 'květina', 'tráva', 'vlna', 'princ', 'zeměkoule', 'kuře', 'list', 'talíř', 'kbelík', 'holka',
+  // z QA (CESTINA-09): ⚽ balón, 🚕 auto, 🚑 záchranka, 🌭 hotdog, 🥧 dort, 🏝️ palma, 👜 taška, 🗑️ popelnice…
+  'míč', 'taxík', 'sanitka', 'párek', 'koláč', 'ostrov', 'kabelka', 'koš', 'palma', 'maso', 'medvídek', 'budík',
+  'sopka', 'déšť', 'klaun',
 ]);
 
 export function genZacina(ctx: GenContext): ZacinaTask[] {
@@ -340,7 +363,7 @@ export function genSkladejSlabiky(ctx: GenContext): SkladejSlabikyTask[] {
 
 /** Obrázkové distraktory: jiné obrázky, přednostně slova se stejným začátkem nebo délkou (nutí číst celé). */
 export function pictureDistractors(ctx: GenContext, target: Word, n: number, pool: readonly Word[] = PICTURE_WORDS): Word[] {
-  const others = pool.filter((w) => w.w !== target.w && w.e !== target.e);
+  const others = pool.filter((w) => w.w !== target.w && w.e !== target.e && !sameGroup(w.w, target.w));
   const first = firstLetterKey(target.w);
   const similar = others.filter((w) => firstLetterKey(w.w) === first || Math.abs(w.len - target.len) <= 1);
   const out = sample(similar, Math.min(similar.length, Math.ceil(n / 2)), ctx.rng);

@@ -2,22 +2,23 @@ import { CaseSwitch, MiniStars, SpeakButton, SpeechBanner } from '../components/
 import { LETTER_KEYS } from '../data/alphabet';
 import { STICKERS } from '../data/stickers';
 import { ACTIVITIES, LEVELS, recommend, type ActivityMeta } from '../engine/meta';
-import { greeting, vocative } from '../kit';
+import { vocative } from '../kit';
 import { DAILY_GOAL, letterMastery, ownedStickerCount, streakDays, todayCount } from '../lib/progress';
 import { href } from '../lib/router';
 import { useSpeech } from '../lib/speech';
-import { childName, useG92Settings, useProgress } from '../lib/store';
+import { childName, useAppSettings, useG92Settings, useProgress } from '../lib/store';
 import { plural } from '../lib/text';
 
-function ActivityCard({ a, stars, played, noVoice }: { a: ActivityMeta; stars: number; played: boolean; noVoice: boolean }) {
+function ActivityCard({ a, stars, played, noVoice, script }: { a: ActivityMeta; stars: number; played: boolean; noVoice: boolean; script: boolean }) {
+  const desc = script && a.id === 'obtahuj' ? 'Tiskací písmenka prstem' : a.desc;
   return (
-    <a className="act-card" href={href(`hra/${a.id}`)} aria-label={`${a.title}. ${a.desc}.${stars ? ` ${stars} ${plural(stars, 'hvězda', 'hvězdy', 'hvězd')}.` : ''}`}>
+    <a className="act-card" href={href(`hra/${a.id}`)} aria-label={`${a.title}. ${desc}.${stars ? ` ${stars} ${plural(stars, 'hvězda', 'hvězdy', 'hvězd')}.` : ''}`}>
       {a.isNew && !played ? <span className="badge-new">Nové</span> : null}
       <span className="act-icon" aria-hidden="true">
         {a.icon}
       </span>
       <span className="act-title">{a.title}</span>
-      <span className="act-desc">{a.desc}</span>
+      <span className="act-desc">{desc}</span>
       <MiniStars n={stars} />
       {noVoice && a.needsVoice ? (
         <span className="text-xs font-bold text-muted" title="Potřebuje hlas – bez hlasu ukáže titulek">
@@ -31,6 +32,7 @@ function ActivityCard({ a, stars, played, noVoice }: { a: ActivityMeta; stars: n
 export function Home({ onVoiceHelp }: { onVoiceHelp: () => void }) {
   const p = useProgress();
   const g = useG92Settings();
+  const settings = useAppSettings();
   const { status } = useSpeech();
   const name = childName(g);
   const hello = `Ahoj, ${vocative(name)}!`;
@@ -38,8 +40,8 @@ export function Home({ onVoiceHelp }: { onVoiceHelp: () => void }) {
   const streak = streakDays(p, new Date());
   const stickers = ownedStickerCount(p);
   const mastered = LETTER_KEYS.filter((k) => letterMastery(p.letters[k]) === 3).length;
-  const rec = ACTIVITIES.find((a) => a.id === recommend(p.activities))!;
   const noVoice = status === 'no-czech' || status === 'unsupported';
+  const rec = ACTIVITIES.find((a) => a.id === recommend(p.activities, undefined, { noVoice }))!;
 
   return (
     <div className="screen">
@@ -50,7 +52,7 @@ export function Home({ onVoiceHelp }: { onVoiceHelp: () => void }) {
           <h1 id="hello" className="text-3xl sm:text-4xl font-black leading-tight">
             {hello} <span aria-hidden="true">👋</span>
           </h1>
-          <SpeakButton text={`${greeting(name)} Co si dnes zahrajeme?`} size={48} soft label="Přečíst pozdrav" />
+          <SpeakButton text={`${hello} Co si dnes zahrajeme?`} size={48} soft label="Přečíst pozdrav" />
         </div>
         <p className="text-muted font-bold mt-1">Co si dnes zahrajeme?</p>
 
@@ -66,17 +68,27 @@ export function Home({ onVoiceHelp }: { onVoiceHelp: () => void }) {
           <a className="g92-chip" href={href('nalepky')}>
             <span aria-hidden="true">📒</span> Nálepky {stickers}/{STICKERS.length}
           </a>
+          {noVoice ? (
+            <button type="button" className="g92-chip" onClick={onVoiceHelp} title="Chybí český hlas – aplikace ukazuje titulky">
+              <span aria-hidden="true">🔇</span> Bez hlasu
+            </button>
+          ) : null}
           <a className="g92-chip" href={href('pismenka')}>
             <span aria-hidden="true">⭐</span> Umím {mastered}/{LETTER_KEYS.length} písmen
           </a>
         </div>
 
         <div className="flex flex-wrap gap-3 mt-5">
-          <a className="g92-btn g92-btn--xl w-full sm:w-auto" href={href(`hra/${rec.id}`)} style={{ minHeight: 72, fontSize: '1.4rem' }}>
-            <span aria-hidden="true" style={{ fontSize: '1.8rem' }}>
+          <a className="g92-btn g92-btn--xl w-full sm:w-auto hero-play" href={href(`hra/${rec.id}`)} aria-label={`Hrát: ${rec.title}`}>
+            <span aria-hidden="true" className="hero-play-icon">
               ▶
             </span>
-            Hrát: {rec.title}
+            <span className="hero-play-text">
+              <span className="hero-play-main">Hrát</span>
+              <span className="hero-play-sub">
+                {rec.icon} {rec.title}
+              </span>
+            </span>
           </a>
           <a
             className="g92-btn g92-btn--secondary g92-btn--xl w-full sm:w-auto"
@@ -99,7 +111,7 @@ export function Home({ onVoiceHelp }: { onVoiceHelp: () => void }) {
       <nav className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4" aria-label="Další">
         <a className="act-card" href={href('abeceda')} style={{ ['--lvl' as string]: '#e0479e' }}>
           <span className="act-icon" aria-hidden="true">
-            🔤
+            🅰️
           </span>
           <span className="act-title">Abeceda</span>
         </a>
@@ -137,7 +149,7 @@ export function Home({ onVoiceHelp }: { onVoiceHelp: () => void }) {
           </div>
           <div className="act-grid">
             {ACTIVITIES.filter((a) => a.level === lvl.id).map((a) => (
-              <ActivityCard key={a.id} a={a} stars={p.activities[a.id]?.bestStars ?? 0} played={(p.activities[a.id]?.sessions ?? 0) > 0} noVoice={noVoice} />
+              <ActivityCard key={a.id} a={a} stars={p.activities[a.id]?.bestStars ?? 0} played={(p.activities[a.id]?.sessions ?? 0) > 0} noVoice={noVoice} script={settings.letterCase === 'script'} />
             ))}
           </div>
         </section>

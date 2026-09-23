@@ -52,9 +52,12 @@ export function emptyLetter(): LetterStats {
   return { seen: 0, correct: 0, recent: '', lastSeen: 0, traced: 0 };
 }
 
-/** Hvězdy za sezení: ≥ 90 % → 3, ≥ 60 % → 2, jinak 1 (za dokončení vždy aspoň jedna). */
-export function starsFor(correct: number, total: number): 0 | 1 | 2 | 3 {
-  if (total <= 0) return 0;
+/**
+ * Hvězdy za sezení: ≥ 90 % napoprvé → 3, ≥ 60 % → 2, jinak 1 – ale jen když dítě opravdu vyřešilo
+ * aspoň polovinu úloh (přeskakováním se hvězdy ani nálepky „vyrobit“ nedají).
+ */
+export function starsFor(correct: number, total: number, solved: number = total): 0 | 1 | 2 | 3 {
+  if (total <= 0 || solved * 2 < total) return 0;
   const r = correct / total;
   if (r >= 0.9) return 3;
   if (r >= 0.6) return 2;
@@ -146,8 +149,11 @@ export function pickSticker(p: Progress, rng: Rng): Sticker {
 
 export interface SessionInput {
   activityId: string;
+  /** Kolik úloh bylo správně napoprvé (může být i zlomek – Párování počítá po dvojicích). */
   correct: number;
   total: number;
+  /** Přeskočené úlohy (nepočítají se jako odvedená práce). */
+  skipped?: number;
   bestStreak: number;
   now: number;
   rng: Rng;
@@ -156,17 +162,20 @@ export interface SessionInput {
 export interface SessionOutcome {
   progress: Progress;
   stars: 0 | 1 | 2 | 3;
-  sticker: Sticker;
+  /** Nálepka jen za odvedenou práci (aspoň 1 hvězda), jinak null. */
+  sticker: Sticker | null;
   isNewSticker: boolean;
   isNewBest: boolean;
   dailyGoalJustReached: boolean;
 }
 
 export function recordSession(p: Progress, input: SessionInput): SessionOutcome {
-  const stars = starsFor(input.correct, input.total);
+  const solved = input.total - (input.skipped ?? 0);
+  const stars = starsFor(input.correct, input.total, solved);
+  const earned = stars > 0;
   const prev = p.activities[input.activityId] ?? emptyActivity();
   const stats: ActivityStats = {
-    sessions: prev.sessions + 1,
+    sessions: prev.sessions + (earned ? 1 : 0),
     bestStars: Math.max(prev.bestStars, stars),
     lastStars: stars,
     correct: prev.correct + input.correct,
@@ -176,22 +185,22 @@ export function recordSession(p: Progress, input: SessionInput): SessionOutcome 
   };
   const dk = dayKey(new Date(input.now));
   const before = p.days[dk] ?? 0;
-  const sticker = pickSticker(p, input.rng);
-  const isNewSticker = !p.stickers[sticker.id];
+  const sticker = earned ? pickSticker(p, input.rng) : null;
+  const isNewSticker = sticker !== null && !p.stickers[sticker.id];
   const progress: Progress = {
     ...p,
     activities: { ...p.activities, [input.activityId]: stats },
-    stickers: { ...p.stickers, [sticker.id]: (p.stickers[sticker.id] ?? 0) + 1 },
-    days: { ...p.days, [dk]: before + 1 },
-    totalSessions: p.totalSessions + 1,
+    stickers: sticker ? { ...p.stickers, [sticker.id]: (p.stickers[sticker.id] ?? 0) + 1 } : p.stickers,
+    days: earned ? { ...p.days, [dk]: before + 1 } : p.days,
+    totalSessions: p.totalSessions + (earned ? 1 : 0),
   };
   return {
     progress,
     stars,
     sticker,
     isNewSticker,
-    isNewBest: stars > prev.bestStars,
-    dailyGoalJustReached: before < DAILY_GOAL && before + 1 >= DAILY_GOAL,
+    isNewBest: earned && stars > prev.bestStars,
+    dailyGoalJustReached: earned && before < DAILY_GOAL && before + 1 >= DAILY_GOAL,
   };
 }
 

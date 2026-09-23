@@ -2,8 +2,9 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { Modal } from './components/Modal';
 import { CaseSwitch, SpeechCaption } from './components/ui';
 import { isSessionId } from './engine/meta';
-import { greeting, h, setHelp } from './kit';
-import { navigate, useRoute } from './lib/router';
+import { h, setHelp, showHelp, vocative } from './kit';
+import { hasLeaveGuard, navigate, setLeaveGuard, useRoute } from './lib/router';
+import { confirmLeave } from './engine/leave';
 import { say, speech } from './lib/speech';
 import { childName, getAppSettings, setAppSettings, useAppSettings, useG92Settings } from './lib/store';
 import { VoiceHelp } from './components/VoiceHelp';
@@ -35,29 +36,42 @@ const HELP_STEPS = [
   { icon: '🅰️', text: 'Vpravo nahoře si vybereš písmo: velká, malá, nebo psací.' },
 ];
 
-/** Nápověda v appbaru (kit): piktogramy + tlačítko, které ji celou přečte nahlas. */
+const HELP = {
+  title: 'Jak na to',
+  howTo: HELP_STEPS,
+  keys: [
+    { keys: ['1', '2', '3', '4'], text: 'vybrat odpověď' },
+    { keys: ['Esc'], text: 'přeskočit úlohu' },
+    { keys: ['←', '→'], text: 'další písmeno v abecedě' },
+  ],
+  extra: h(
+    'p',
+    { class: 'g92-hint' },
+    'Pro rodiče: v Nastavení (⚙) je výběr hlasu, rychlost řeči, počet úloh, procvičovaná písmena a přesnost obtahování. Postup se ukládá v tomto zařízení.',
+  ),
+};
+
+/**
+ * Nápověda v appbaru (kit „?“). Dítě neumí číst, takže „🔊 Přečíst nahlas“ musí být úplně nahoře –
+ * kit ho staví až za piktogramy, proto dialog otevíráme sami a tlačítko přidáme na začátek (CESTINA-16).
+ */
 function useAppHelp() {
+  useEffect(() => setHelp(HELP), []);
   useEffect(() => {
-    const read = h(
-      'button',
-      { type: 'button', class: 'g92-btn g92-btn--soft', onclick: () => void say(HELP_STEPS.map((x) => x.text).join(' ')) },
-      '🔊 Přečíst nahlas',
-    );
-    const note = h(
-      'p',
-      { class: 'g92-hint' },
-      'Pro rodiče: v Nastavení (⚙) je výběr hlasu, rychlost řeči, počet úloh, procvičovaná písmena a přesnost obtahování. Postup se ukládá v tomto zařízení.',
-    );
-    return setHelp({
-      title: 'Jak to funguje',
-      howTo: HELP_STEPS,
-      keys: [
-        { keys: ['1', '2', '3', '4'], text: 'vybrat odpověď' },
-        { keys: ['Esc'], text: 'přeskočit úlohu' },
-        { keys: ['←', '→'], text: 'další písmeno v abecedě' },
-      ],
-      extra: h('div', { class: 'g92-stack' }, read, note),
-    });
+    const onHelp = (e: Event) => {
+      e.preventDefault();
+      const d = showHelp(HELP);
+      if (!d) return;
+      const read = h(
+        'button',
+        { type: 'button', class: 'g92-btn g92-btn--lg g92-btn--block', onclick: () => void say(HELP_STEPS.map((x) => x.text).join(' ')) },
+        '🔊 Přečíst nahlas',
+      );
+      d.body.prepend(read);
+      read.focus({ preventScroll: true });
+    };
+    document.addEventListener('g92-help', onHelp);
+    return () => document.removeEventListener('g92-help', onHelp);
   }, []);
 }
 
@@ -72,6 +86,25 @@ export function App() {
 
   useEffect(() => {
     speech.init();
+  }, []);
+
+  // „‹ Menu“ v liště během rozehraného cvičení: nejdřív se zeptat (CESTINA-11).
+  // Lišta je web component se shadow DOM – odkaz najdeme přes composedPath().
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (!hasLeaveGuard() || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+      const link = e.composedPath().find((n): n is HTMLAnchorElement => n instanceof HTMLAnchorElement && n.classList.contains('back'));
+      const host = (link?.getRootNode() as ShadowRoot | undefined)?.host;
+      if (!link || host?.localName !== 'g92-appbar') return;
+      e.preventDefault();
+      void confirmLeave().then((ok) => {
+        if (!ok) return;
+        setLeaveGuard(null);
+        location.href = link.href;
+      });
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
   }, []);
 
   useEffect(() => {
@@ -116,7 +149,7 @@ export function App() {
   const startWelcome = () => {
     setWelcome(false);
     setAppSettings({ onboarded: true });
-    void say(`${greeting(childName(g))} Já jsem tvoje čeština. Ťukni na velké tlačítko Hrát a jdeme na to!`);
+    void say(`Ahoj, ${vocative(childName(g))}! Já jsem tvoje čeština. Ťukni na velké tlačítko Hrát a jdeme na to!`);
   };
 
   return (
