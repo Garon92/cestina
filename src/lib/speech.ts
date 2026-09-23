@@ -198,7 +198,11 @@ class SpeechEngine {
       u.rate = rate;
       u.pitch = 1.05;
       const voice = this.pickVoice();
-      if (voice) u.voice = voice;
+      try {
+        if (voice) u.voice = voice;
+      } catch {
+        /* některé prohlížeče odmítnou hlas z jiného okna / podvržený objekt */
+      }
       u.onend = finish;
       u.onerror = (e) => {
         // Síťový hlas offline → označit za rozbitý a zkusit příště jiný.

@@ -1,0 +1,842 @@
+@import 'tailwindcss';
+@import '../kit/tailwind-theme.css';
+@import '@fontsource/playwrite-cz/400.css';
+
+/* ==========================================================================
+   Čeština pro Adámka – vlastní komponenty nad g92 kitem.
+   Barvy jen přes tokeny kitu (light/dark se přepíná samo).
+   ========================================================================== */
+
+:root {
+  --script-font: 'Playwrite CZ', 'Segoe Script', cursive;
+  --tile-radius: var(--g92-radius-xl);
+  --lvl: var(--accent);
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
+.script {
+  font-family: var(--script-font);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* ─── Obrazovky ─────────────────────────────────────────────────────────── */
+
+.screen {
+  width: 100%;
+  max-width: 68rem;
+  margin-inline: auto;
+  padding: var(--g92-space-4) var(--g92-gutter) calc(var(--g92-space-10) + env(safe-area-inset-bottom, 0px));
+}
+
+.screen--narrow {
+  max-width: 46rem;
+}
+
+/* Cvičení vyplní výšku okna (na tabletu bez scrollování). */
+.play {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - var(--g92-appbar-total, 60px));
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: var(--g92-space-3) var(--g92-gutter) calc(var(--g92-space-4) + env(safe-area-inset-bottom, 0px));
+  gap: var(--g92-space-3);
+}
+
+.play-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.75rem, 2.5vh, 1.75rem);
+  width: 100%;
+}
+
+/* ─── Dlaždice (odpovědi) ─────────────────────────────────────────────────── */
+
+.tile {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15em;
+  min-width: var(--g92-touch-xl);
+  min-height: var(--g92-touch-xl);
+  padding: 0.35em 0.6em;
+  border-radius: var(--tile-radius);
+  border: 3px solid var(--g92-border);
+  background: var(--g92-surface);
+  color: var(--g92-text);
+  box-shadow: 0 4px 0 var(--g92-border-strong), var(--g92-shadow-1);
+  font-weight: var(--g92-fw-black);
+  line-height: 1.05;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition:
+    transform var(--g92-dur-1) var(--g92-ease-out),
+    box-shadow var(--g92-dur-1) var(--g92-ease-out),
+    background-color var(--g92-dur-2),
+    border-color var(--g92-dur-2),
+    opacity var(--g92-dur-3);
+}
+
+@media (hover: hover) {
+  .tile:not(:disabled):hover {
+    border-color: var(--lvl);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 color-mix(in oklab, var(--lvl) 45%, var(--g92-border-strong)), var(--g92-shadow-2);
+  }
+}
+
+.tile:not(:disabled):active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--g92-border-strong);
+}
+
+.tile:focus-visible {
+  outline: 4px solid var(--accent-ring);
+  outline-offset: 3px;
+}
+
+.tile:disabled {
+  cursor: default;
+}
+
+.tile.is-correct {
+  background: var(--g92-success-soft);
+  border-color: var(--g92-success);
+  color: var(--g92-text);
+  box-shadow: 0 4px 0 color-mix(in oklab, var(--g92-success) 60%, transparent), 0 0 0 6px color-mix(in oklab, var(--g92-success) 18%, transparent);
+  animation: tile-pop var(--g92-dur-4) var(--g92-ease-spring);
+}
+
+.tile.is-wrong {
+  background: var(--g92-danger-soft);
+  border-color: var(--g92-danger);
+  animation: tile-shake 420ms var(--g92-ease-out);
+}
+
+.tile.is-dim {
+  opacity: 0.38;
+}
+
+.tile.is-hint {
+  animation: tile-hint 1.2s var(--g92-ease-in-out) infinite;
+  border-color: var(--g92-gold);
+}
+
+.tile.is-selected {
+  border-color: var(--lvl);
+  background: color-mix(in oklab, var(--lvl) 14%, var(--g92-surface));
+  box-shadow: 0 4px 0 color-mix(in oklab, var(--lvl) 55%, transparent), 0 0 0 5px color-mix(in oklab, var(--lvl) 22%, transparent);
+  transform: translateY(-2px);
+}
+
+.tile.is-done {
+  opacity: 0.55;
+  background: var(--g92-surface-2);
+  box-shadow: none;
+  border-style: dashed;
+}
+
+@keyframes tile-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(calc(1 + 0.12 * var(--g92-motion))); }
+  100% { transform: scale(1); }
+}
+
+@keyframes tile-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(calc(-10px * var(--g92-motion))); }
+  40% { transform: translateX(calc(9px * var(--g92-motion))); }
+  60% { transform: translateX(calc(-6px * var(--g92-motion))); }
+  80% { transform: translateX(calc(4px * var(--g92-motion))); }
+}
+
+@keyframes tile-hint {
+  0%, 100% { box-shadow: 0 4px 0 var(--g92-border-strong), 0 0 0 0 color-mix(in oklab, var(--g92-gold) 55%, transparent); }
+  50% { box-shadow: 0 4px 0 var(--g92-border-strong), 0 0 0 10px color-mix(in oklab, var(--g92-gold) 0%, transparent); }
+}
+
+/* Mřížky odpovědí */
+.choices {
+  display: grid;
+  gap: clamp(0.6rem, 2vw, 1.1rem);
+  width: 100%;
+  max-width: 40rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choices--4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .choices--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 52rem;
+  }
+}
+
+.choices--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.choices .tile {
+  width: 100%;
+}
+
+.tile--letter {
+  aspect-ratio: 1;
+  font-size: clamp(2.6rem, 9vw, 4.4rem);
+}
+
+.tile--letter.script {
+  font-size: clamp(2rem, 7vw, 3.4rem);
+}
+
+.tile--word {
+  min-height: clamp(4.5rem, 12vh, 6rem);
+  font-size: clamp(1.35rem, 4.4vw, 2.1rem);
+  font-weight: var(--g92-fw-black);
+  word-break: break-word;
+  text-align: center;
+}
+
+.tile--word.script {
+  font-size: clamp(1.15rem, 3.6vw, 1.7rem);
+}
+
+.tile--pic {
+  aspect-ratio: 1;
+  font-size: clamp(3rem, 12vw, 5.5rem);
+}
+
+.tile .tile-caption {
+  font-size: var(--g92-fs-sm);
+  font-weight: var(--g92-fw-bold);
+  color: var(--g92-text-muted);
+}
+
+/* ─── Velká písmena / slova v zadání ─────────────────────────────────────── */
+
+.prompt-letter {
+  font-weight: var(--g92-fw-black);
+  font-size: clamp(6rem, 26vmin, 12rem);
+  line-height: 1;
+  color: var(--lvl);
+  text-shadow: 0 6px 0 color-mix(in oklab, var(--lvl) 22%, transparent);
+}
+
+.prompt-letter.script {
+  font-size: clamp(4.5rem, 20vmin, 9rem);
+  line-height: 1.25;
+}
+
+.prompt-word {
+  font-weight: var(--g92-fw-black);
+  font-size: clamp(2.4rem, 10vw, 5rem);
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  word-break: break-word;
+}
+
+.prompt-word.script {
+  font-size: clamp(2rem, 8vw, 3.8rem);
+  line-height: 1.5;
+}
+
+.prompt-sentence {
+  font-weight: var(--g92-fw-black);
+  font-size: clamp(1.6rem, 5.4vw, 2.8rem);
+  line-height: 1.35;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.prompt-sentence.script {
+  font-size: clamp(1.3rem, 4.2vw, 2.1rem);
+  line-height: 1.7;
+}
+
+.prompt-emoji {
+  font-size: clamp(5rem, 22vmin, 9rem);
+  line-height: 1;
+  filter: drop-shadow(0 8px 12px rgb(0 0 0 / 0.12));
+}
+
+.blank {
+  display: inline-block;
+  min-width: 3.2em;
+  border-bottom: 0.12em dashed var(--lvl);
+  color: transparent;
+  margin-inline: 0.15em;
+  transform: translateY(-0.05em);
+}
+
+.blank.is-filled {
+  color: var(--g92-success);
+  border-bottom-color: var(--g92-success);
+  animation: tile-pop var(--g92-dur-4) var(--g92-ease-spring);
+}
+
+.syl-a {
+  color: var(--lvl);
+}
+
+.syl-b {
+  color: color-mix(in oklab, #2f7cf6 88%, var(--g92-text));
+}
+
+.syl-sep {
+  color: var(--g92-text-subtle);
+  font-weight: var(--g92-fw-bold);
+  margin-inline: 0.05em;
+}
+
+/* ─── Mluvící tlačítko ──────────────────────────────────────────────────── */
+
+.speak-btn {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--speak-size, 64px);
+  height: var(--speak-size, 64px);
+  border-radius: 50%;
+  border: 0;
+  background: var(--lvl);
+  color: #fff;
+  box-shadow: 0 5px 0 color-mix(in oklab, var(--lvl) 60%, #000), var(--g92-shadow-2);
+  cursor: pointer;
+  flex: none;
+  touch-action: manipulation;
+  transition: transform var(--g92-dur-1) var(--g92-ease-out), box-shadow var(--g92-dur-1);
+}
+
+.speak-btn svg {
+  width: 52%;
+  height: 52%;
+}
+
+.speak-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--lvl) 60%, #000);
+}
+
+.speak-btn:focus-visible {
+  outline: 4px solid var(--accent-ring);
+  outline-offset: 3px;
+}
+
+.speak-btn.is-speaking::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 3px solid var(--lvl);
+  animation: speak-ring 1s var(--g92-ease-out) infinite;
+}
+
+.speak-btn--soft {
+  background: color-mix(in oklab, var(--lvl) 14%, var(--g92-surface));
+  color: var(--lvl);
+  box-shadow: 0 4px 0 color-mix(in oklab, var(--lvl) 30%, var(--g92-border-strong));
+}
+
+@keyframes speak-ring {
+  from { transform: scale(0.95); opacity: 0.9; }
+  to { transform: scale(calc(1 + 0.35 * var(--g92-motion))); opacity: 0; }
+}
+
+/* ─── Pokrok v sezení ───────────────────────────────────────────────────── */
+
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--g92-surface-3);
+  transition: background-color var(--g92-dur-3), transform var(--g92-dur-3) var(--g92-ease-spring);
+}
+
+.dot.is-current {
+  background: var(--lvl);
+  transform: scale(1.35);
+}
+
+.dot.is-ok {
+  background: var(--g92-success);
+}
+
+.dot.is-miss {
+  background: var(--g92-warning);
+}
+
+/* ─── Karty na domovské obrazovce ──────────────────────────────────────── */
+
+.act-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.9rem 0.6rem 0.75rem;
+  border-radius: var(--g92-radius-xl);
+  background: var(--g92-surface);
+  border: 2px solid var(--g92-border);
+  box-shadow: 0 4px 0 color-mix(in oklab, var(--lvl) 30%, var(--g92-border)), var(--g92-shadow-1);
+  text-align: center;
+  color: var(--g92-text);
+  text-decoration: none;
+  touch-action: manipulation;
+  transition: transform var(--g92-dur-2) var(--g92-ease-out), box-shadow var(--g92-dur-2), border-color var(--g92-dur-2);
+}
+
+@media (hover: hover) {
+  .act-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--lvl);
+    box-shadow: 0 7px 0 color-mix(in oklab, var(--lvl) 45%, var(--g92-border)), var(--g92-shadow-2);
+  }
+}
+
+.act-card:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--lvl) 30%, var(--g92-border));
+}
+
+.act-card:focus-visible {
+  outline: 4px solid var(--accent-ring);
+  outline-offset: 3px;
+}
+
+.act-icon {
+  display: grid;
+  place-items: center;
+  width: 4.2rem;
+  height: 4.2rem;
+  border-radius: 1.4rem;
+  font-size: 2.5rem;
+  background: color-mix(in oklab, var(--lvl) 16%, var(--g92-surface));
+}
+
+.act-title {
+  font-weight: var(--g92-fw-black);
+  font-size: var(--g92-fs-lg);
+  line-height: 1.15;
+}
+
+.act-desc {
+  font-size: var(--g92-fs-sm);
+  color: var(--g92-text-muted);
+  line-height: 1.3;
+}
+
+.mini-stars {
+  display: flex;
+  gap: 2px;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.mini-star {
+  color: var(--g92-surface-3);
+}
+
+.mini-star.is-on {
+  color: var(--g92-gold);
+}
+
+.badge-new {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--lvl);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: var(--g92-fw-black);
+  box-shadow: var(--g92-shadow-2);
+  transform: rotate(6deg);
+}
+
+.level-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1.6rem 0 0.8rem;
+}
+
+.level-badge {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.9rem;
+  font-size: 1.5rem;
+  background: var(--lvl);
+  box-shadow: 0 3px 0 color-mix(in oklab, var(--lvl) 60%, #000);
+}
+
+.act-grid {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, 46%), 1fr));
+}
+
+/* ─── Panel s kartou ────────────────────────────────────────────────────── */
+
+.panel {
+  background: var(--g92-surface);
+  border: 1px solid var(--g92-border);
+  border-radius: var(--g92-radius-xl);
+  box-shadow: var(--g92-shadow-2);
+}
+
+/* ─── Titulek řeči (když chybí hlas) ───────────────────────────────────── */
+
+.caption {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: var(--g92-z-toast);
+  max-width: min(36rem, calc(100vw - 2rem));
+  padding: 0.7rem 1.1rem;
+  border-radius: 1.2rem;
+  background: var(--g92-text);
+  color: var(--g92-bg);
+  font-weight: var(--g92-fw-bold);
+  font-size: var(--g92-fs-lg);
+  box-shadow: var(--g92-shadow-3);
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  pointer-events: none;
+  animation: caption-in var(--g92-dur-3) var(--g92-ease-out);
+}
+
+@keyframes caption-in {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ─── Pochvala po správné odpovědi ──────────────────────────────────────── */
+
+.praise {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: var(--g92-z-overlay);
+}
+
+.praise-bubble {
+  padding: 0.6rem 1.5rem;
+  border-radius: 999px;
+  background: var(--g92-success);
+  color: #fff;
+  font-weight: var(--g92-fw-black);
+  font-size: clamp(1.6rem, 6vw, 2.6rem);
+  box-shadow: var(--g92-shadow-4);
+  animation: praise 1s var(--g92-ease-spring) forwards;
+}
+
+@keyframes praise {
+  0% { opacity: 0; transform: scale(0.4) rotate(-6deg); }
+  25% { opacity: 1; transform: scale(1.08) rotate(2deg); }
+  40% { transform: scale(1) rotate(0deg); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(calc(-30px * var(--g92-motion))) scale(0.96); }
+}
+
+/* ─── Obtahování ───────────────────────────────────────────────────────── */
+
+.trace-wrap {
+  position: relative;
+  width: min(100%, 34rem);
+  aspect-ratio: 1 / 1.05;
+  max-height: calc(100dvh - var(--g92-appbar-total, 60px) - 12rem);
+  border-radius: var(--g92-radius-2xl);
+  background: var(--g92-surface);
+  border: 3px solid var(--g92-border);
+  box-shadow: var(--g92-shadow-2);
+  overflow: hidden;
+  touch-action: none;
+}
+
+.trace-wrap canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+/* ─── Klávesnice (diktát) ──────────────────────────────────────────────── */
+
+.kbd {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  max-width: 44rem;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.kbd-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.kbd-key {
+  flex: 1 1 0;
+  max-width: 3.6rem;
+  min-width: 0;
+  height: clamp(2.9rem, 7.5vh, 3.6rem);
+  border-radius: 0.8rem;
+  border: 2px solid var(--g92-border);
+  background: var(--g92-surface);
+  color: var(--g92-text);
+  box-shadow: 0 3px 0 var(--g92-border-strong);
+  font-size: clamp(1.1rem, 4.2vw, 1.6rem);
+  font-weight: var(--g92-fw-black);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.kbd-key:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--g92-border-strong);
+}
+
+.kbd-key--mod {
+  background: color-mix(in oklab, var(--lvl) 14%, var(--g92-surface));
+  border-color: color-mix(in oklab, var(--lvl) 35%, var(--g92-border));
+  max-width: 5rem;
+  flex-grow: 1.3;
+}
+
+.kbd-key--wide {
+  max-width: 8rem;
+  flex-grow: 2;
+  font-size: var(--g92-fs-lg);
+}
+
+.kbd-key:focus-visible {
+  outline: 3px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.3rem, 1.2vw, 0.6rem);
+}
+
+.slot {
+  display: grid;
+  place-items: center;
+  min-width: clamp(2.8rem, 10vw, 4.2rem);
+  height: clamp(3.4rem, 12vw, 5rem);
+  padding: 0 0.3rem;
+  border-radius: 1rem;
+  border: 3px dashed color-mix(in oklab, var(--lvl) 50%, var(--g92-border-strong));
+  font-size: clamp(1.8rem, 7vw, 3rem);
+  font-weight: var(--g92-fw-black);
+  background: color-mix(in oklab, var(--lvl) 5%, transparent);
+  transition: background-color var(--g92-dur-2), border-color var(--g92-dur-2);
+}
+
+.slot.is-filled {
+  border-style: solid;
+  border-color: var(--lvl);
+  background: var(--g92-surface);
+  animation: tile-pop var(--g92-dur-3) var(--g92-ease-spring);
+}
+
+.slot.is-next {
+  border-color: var(--lvl);
+  background: color-mix(in oklab, var(--lvl) 12%, transparent);
+}
+
+.slot.is-ok {
+  border-color: var(--g92-success);
+  background: var(--g92-success-soft);
+}
+
+.slot.is-bad {
+  border-color: var(--g92-danger);
+  background: var(--g92-danger-soft);
+}
+
+.slot.script {
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+}
+
+/* ─── Nálepky ──────────────────────────────────────────────────────────── */
+
+.sticker {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 1.4rem;
+  font-size: clamp(2rem, 8vw, 2.8rem);
+  background: var(--g92-surface);
+  border: 2px solid var(--g92-border);
+  box-shadow: var(--g92-shadow-1);
+  position: relative;
+}
+
+.sticker.is-missing {
+  background: var(--g92-surface-2);
+  border-style: dashed;
+  color: var(--g92-text-subtle);
+  font-size: 1.4rem;
+  box-shadow: none;
+}
+
+.sticker-count {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  font-size: 0.72rem;
+  font-weight: var(--g92-fw-black);
+  color: var(--g92-text-muted);
+}
+
+.sticker-reveal {
+  font-size: clamp(5rem, 22vmin, 8rem);
+  animation: sticker-in 900ms var(--g92-ease-spring) both;
+  filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.18));
+}
+
+@keyframes sticker-in {
+  0% { transform: scale(0) rotate(-40deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.big-stars {
+  display: flex;
+  gap: 0.4rem;
+  font-size: clamp(3rem, 12vw, 4.5rem);
+  line-height: 1;
+}
+
+.big-star {
+  color: var(--g92-surface-3);
+  transform: scale(0.8);
+}
+
+.big-star.is-on {
+  color: var(--g92-gold);
+  animation: star-in 600ms var(--g92-ease-spring) both;
+  text-shadow: 0 4px 0 color-mix(in oklab, var(--g92-gold) 55%, #000);
+}
+
+@keyframes star-in {
+  0% { transform: scale(0) rotate(-90deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* ─── Písmenka „umím“ ──────────────────────────────────────────────────── */
+
+.mastery-0 { --m: var(--g92-surface-2); }
+.mastery-1 { --m: color-mix(in oklab, var(--g92-warning) 22%, var(--g92-surface)); }
+.mastery-2 { --m: color-mix(in oklab, var(--g92-info) 22%, var(--g92-surface)); }
+.mastery-3 { --m: color-mix(in oklab, var(--g92-success) 30%, var(--g92-surface)); }
+
+.letter-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 1rem;
+  background: var(--m);
+  border: 2px solid var(--g92-border);
+  font-weight: var(--g92-fw-black);
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  color: var(--g92-text);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform var(--g92-dur-1);
+}
+
+.letter-cell:active {
+  transform: scale(0.94);
+}
+
+.letter-cell:focus-visible {
+  outline: 3px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+
+.letter-cell .star-mark {
+  position: absolute;
+  right: 3px;
+  top: 1px;
+  font-size: 0.8rem;
+}
+
+/* ─── Drobnosti ────────────────────────────────────────────────────────── */
+
+.hold-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.hold-btn .hold-fill {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, var(--accent) 30%, transparent);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+.hold-btn.is-holding .hold-fill {
+  transform: scaleX(1);
+  transition: transform 1.6s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .praise-bubble,
+  .sticker-reveal,
+  .big-star.is-on,
+  .tile.is-correct,
+  .tile.is-wrong {
+    animation-duration: 1ms !important;
+  }
+}
+
+html[data-motion='reduce'] .praise-bubble,
+html[data-motion='reduce'] .sticker-reveal,
+html[data-motion='reduce'] .big-star.is-on,
+html[data-motion='reduce'] .tile.is-hint {
+  animation: none !important;
+}

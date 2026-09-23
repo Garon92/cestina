@@ -97,6 +97,40 @@ export class StrokeTracer {
     return true;
   }
 
+  /**
+   * Pokračování po zvednutí prstu: když dítě položí prst zpět blízko místa, kam už došlo,
+   * tah pokračuje (neztratí rozdělanou práci). Vrací false, když je prst jinde.
+   */
+  resume(p: Pt): boolean {
+    if (this.progress <= 0 || this.dot) return false;
+    const at = this.samples[this.progress]!;
+    if (dist(p, at) > this.tol * 1.7) return false;
+    this.started = true;
+    this.last = null;
+    this.feed(p);
+    return true;
+  }
+
+  /** Prst zvednut uprostřed tahu – pokrok zůstává, další dotyk může navázat přes `resume`. */
+  lift(): void {
+    this.started = false;
+    this.last = null;
+  }
+
+  /** Zahodí rozpracovaný tah (začíná se znovu od začátku). */
+  reset(): void {
+    this.started = false;
+    this.progress = 0;
+    this.onPath = 0;
+    this.total = 0;
+    this.last = null;
+  }
+
+  /** Aktuální pokrok v bodech tahu (0 = nic). */
+  get hasProgress(): boolean {
+    return this.progress > 0;
+  }
+
   /** Další bod pohybu. Mezi vzdálenými body interpoluje, aby rychlý tah nic nepřeskočil. */
   move(p: Pt): void {
     if (!this.started) return;

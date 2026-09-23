@@ -1,105 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="cs">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Čeština pro Adámka</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-
-  <div class="main-area" style="justify-content: center; padding-top: 40px;">
-    <h1 style="font-size: 2.2rem; color: var(--gold); text-align: center; margin-bottom: 6px;">
-      Čeština pro Adámka
-    </h1>
-    <p style="color: var(--gray); margin-bottom: 30px; text-align: center;">Vyber si, co chceš procvičovat</p>
-
-    <div class="menu-grid" id="menuGrid"></div>
-  </div>
-
-  <script src="js/common.js"></script>
-  <script>
-    const modules = [
-      {
-        href: 'abeceda.html',
-        icon: '🔤',
-        label: 'Abeceda',
-        desc: 'Všechna písmena a jak se čtou',
-        key: 'abeceda'
-      },
-      {
-        href: 'poznavani.html',
-        icon: '🧩',
-        label: 'Poznávání',
-        desc: 'Poznáš velké a malé písmeno?',
-        key: 'poznavani'
-      },
-      {
-        href: 'parovani.html',
-        icon: '🔗',
-        label: 'Párování',
-        desc: 'Spoj velká a malá písmenka',
-        key: 'parovani'
-      },
-      {
-        href: 'poslouchej.html',
-        icon: '👂',
-        label: 'Poslouchej',
-        desc: 'Uslyšíš písmenko, vyber správné',
-        key: 'poslouchej'
-      },
-      {
-        href: 'slova.html',
-        icon: '📖',
-        label: 'Slova',
-        desc: 'Přečti VELKÉ slovo, najdi malé',
-        key: 'slova'
-      },
-      {
-        href: 'psani.html',
-        icon: '⌨️',
-        label: 'Piš a poslouchej',
-        desc: 'Napiš cokoli a nech si to přečíst',
-        trackProgress: false
-      },
-      {
-        href: 'vety.html',
-        icon: '✏️',
-        label: 'Věty',
-        desc: 'Doplň chybějící slovo do věty',
-        key: 'vety'
-      },
-      {
-        href: 'skladani.html',
-        icon: '🧱',
-        label: 'Skládání',
-        desc: 'Složi slovo z rozházených písmen',
-        key: 'skladani'
-      }
-    ];
-
-    const grid = document.getElementById('menuGrid');
-
-    modules.forEach(m => {
-      const stars = m.trackProgress === false ? 0 : getModuleStars(m.key);
-      const starsHtml = m.trackProgress === false
-        ? ''
-        : `<div class="progress-stars">${Array.from({ length: 3 }, (_, i) =>
-            `<span class="star-icon ${i < stars ? 'earned' : 'empty'}">${i < stars ? '⭐' : '☆'}</span>`
-          ).join('')}</div>`;
-
-      const card = document.createElement('a');
-      card.href = m.href;
-      card.className = 'card menu-card';
-      card.innerHTML = `
-        <span class="icon">${m.icon}</span>
-        <span class="label">${m.label}</span>
-        <span class="desc">${m.desc}</span>
-        ${starsHtml}
-      `;
-      grid.appendChild(card);
-    });
-  </script>
-
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#e0479e" />
+    <meta name="description" content="Čeština pro Adámka – písmenka, slabiky, slova a věty. Hravé procvičování čtení a psaní pro malé čtenáře s českým hlasem." />
+    <link rel="icon" href="/cestina/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/cestina/apple-touch-icon.png" />
+    <title>Čeština pro Adámka</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Aplikace potřebuje zapnutý JavaScript.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
