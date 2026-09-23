@@ -2,12 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CaseSwitch, HomeIcon, ProgressDots, SpeakButton } from '../components/ui';
 import { LETTER_KEYS } from '../data/alphabet';
 import { confirmDialog, confetti, createDaily, haptic, recordActivity, sfx, toast } from '../kit';
-import { lettersMasteredRatio, ownedStickerCount, recordLetter, recordSession, type SessionOutcome } from '../lib/progress';
+import { lettersMasteredRatio, ownedStickerCount, recordLetter, recordSession, starsRatio, type SessionOutcome } from '../lib/progress';
 import { mulberry32 } from '../lib/random';
 import { navigate } from '../lib/router';
 import { say, speech } from '../lib/speech';
 import { getProgress, updateProgress, useAppSettings } from '../lib/store';
-import { ACTIVITY_BY_ID, levelColor, recommend, type SessionId } from './meta';
+import { ACTIVITIES, ACTIVITY_BY_ID, levelColor, recommend, type SessionId } from './meta';
 import { sessionDef } from './registry';
 import { Results } from './Results';
 import type { LetterResult, ReviewItem, TaskApi } from './types';
@@ -96,7 +96,8 @@ export function Session({ id, focus }: { id: SessionId; focus?: string }) {
         return outcome.progress;
       });
       recordActivity('cestina', {
-        progress: lettersMasteredRatio(p, LETTER_KEYS),
+        // Postup pro menu: půl hvězdičky ze všech cvičení, půl písmenka „umím“.
+        progress: 0.5 * starsRatio(p, ACTIVITIES.map((a) => a.id)) + 0.5 * lettersMasteredRatio(p, LETTER_KEYS),
         metric: { label: 'Nálepky', value: ownedStickerCount(p) },
         note: def.meta.title,
       });

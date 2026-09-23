@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DAILY_GOAL, dayKey, emptyProgress, letterMastery, migrateLegacyProgress, ownedStickerCount, recordLetter, recordSession,
-  recordTraced, starsFor, streakDays, todayCount,
+  recordTraced, starsFor, starsRatio, streakDays, todayCount,
 } from '../src/lib/progress';
 import { STICKERS } from '../src/data/stickers';
 import { mulberry32 } from '../src/lib/random';
@@ -101,6 +101,17 @@ describe('sezení, nálepky, denní cíl', () => {
     const q = { ...p, days: { [d(1)]: 1, [d(2)]: 1 } };
     expect(streakDays(q, new Date(2026, 8, 23))).toBe(2);
     expect(streakDays(emptyProgress(), new Date(2026, 8, 23))).toBe(0);
+  });
+});
+
+describe('souhrnný postup', () => {
+  it('počítá podíl hvězd', () => {
+    const p = emptyProgress();
+    expect(starsRatio(p, ['a', 'b'])).toBe(0);
+    p.activities.a = { sessions: 1, bestStars: 3, lastStars: 3, correct: 1, total: 1, bestStreak: 1, lastPlayed: 0 };
+    p.activities.b = { sessions: 1, bestStars: 1, lastStars: 1, correct: 1, total: 1, bestStreak: 1, lastPlayed: 0 };
+    expect(starsRatio(p, ['a', 'b'])).toBeCloseTo(4 / 6);
+    expect(starsRatio(p, [])).toBe(0);
   });
 });
 

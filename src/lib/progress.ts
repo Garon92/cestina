@@ -228,6 +228,12 @@ export function migrateLegacyProgress(raw: unknown, now: number): Record<string,
   return out;
 }
 
+/** Podíl získaných hvězd ze všech možných (3 na cvičení). */
+export function starsRatio(p: Progress, ids: readonly string[]): number {
+  if (!ids.length) return 0;
+  return ids.reduce((s, id) => s + Math.min(3, p.activities[id]?.bestStars ?? 0), 0) / (ids.length * 3);
+}
+
 /** Podíl písmen, která dítě „umí“ (pro menu / přehled). */
 export function lettersMasteredRatio(p: Progress, keys: readonly string[]): number {
   if (!keys.length) return 0;
