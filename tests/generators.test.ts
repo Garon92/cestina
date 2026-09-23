@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { LETTER_KEYS, soundsAlike, firstLetterKey, letterByKey } from '../src/data/alphabet';
 import { SINGLE_WORDS, findWord } from '../src/data/words';
 import {
+  AMBIGUOUS_NAMES,
   genCtiSlabiky, genCtiSlova, genDiktat, genHledej, genObtahuj, genParovani, genPoslouchej, genPoznavani, genPravda,
   genRymy, genSkladani, genSkladejSlabiky, genSlabiky, genSlova, genVety, genZacina, isPhoneticWord, rhymeTail,
   similarWords, syllablePool, wordFitsLetters, type GenContext,
@@ -102,6 +103,7 @@ describe('generátory', () => {
         expect(letterByKey(o).base ?? o).not.toBe(base);
       }
       expect(t.emoji).not.toBe('');
+      expect(AMBIGUOUS_NAMES.has(t.word)).toBe(false);
     }
   });
 

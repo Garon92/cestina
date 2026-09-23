@@ -174,6 +174,31 @@ export function Session({ id, focus }: { id: ActivityId; focus?: string }) {
     },
   };
 
+  /** Přeskočit úlohu (počítá se jako chyba) – pro případ, že dítě neví nebo nefunguje hlas. */
+  const skip = () => {
+    if (solved || task === undefined || result) return;
+    const snapshot = [...mistakes];
+    snapshot[index] = Math.max(1, snapshot[index] ?? 0);
+    setMistakes(snapshot);
+    streak.current = 0;
+    const lk = def.letterOf?.(task);
+    if (lk) updateProgress((p) => recordLetter(p, lk, false, Date.now()));
+    seq.current++;
+    speech.cancel();
+    setPraise(null);
+    next(snapshot);
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+      e.preventDefault();
+      skip();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   const exit = async () => {
     if (!result && index > 0) {
       const ok = await confirmDialog({
@@ -225,6 +250,11 @@ export function Session({ id, focus }: { id: ActivityId; focus?: string }) {
         <div className="flex-1 min-w-0">
           <ProgressDots states={dotStates} current={index} />
         </div>
+        <button type="button" className="g92-btn g92-btn--ghost g92-btn--icon" onClick={skip} aria-label="Přeskočit úlohu (Esc)" title="Přeskočit úlohu (Esc)" disabled={solved}>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+            <path d="M3.5 6.2v11.6c0 .8.9 1.2 1.5.7L12 13v4.8c0 .8.9 1.2 1.5.7l7.4-5.8c.5-.4.5-1.1 0-1.5l-7.4-5.8c-.6-.5-1.5-.1-1.5.7V11L5 5.5c-.6-.5-1.5-.1-1.5.7Z" />
+          </svg>
+        </button>
         <CaseSwitch compact />
       </div>
       <div className="flex items-center justify-center gap-3 px-1">

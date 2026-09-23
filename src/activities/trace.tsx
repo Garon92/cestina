@@ -15,7 +15,7 @@ function ObtahujView({ task, api }: { task: ObtahujTask; api: TaskApi }) {
   const tol = TOLERANCE[api.settings.traceTolerance];
   const mistakes = useRef(0);
   return (
-    <>
+    <div className="trace-layout">
       <TraceCanvas
         char={task.char}
         tol={tol}
@@ -33,7 +33,13 @@ function ObtahujView({ task, api }: { task: ObtahujTask; api: TaskApi }) {
           api.done({ say: `${l.say}. ${l.word}.` });
         }}
       />
-      <div className="flex gap-3 flex-wrap justify-center">
+      <div className="trace-side">
+        <div className="trace-model" aria-hidden="true">
+          <span className="trace-model-letter">{task.char}</span>
+          <span className="trace-model-word">
+            <span aria-hidden="true">{l.emoji}</span> {l.word}
+          </span>
+        </div>
         <button type="button" className="g92-btn g92-btn--soft g92-btn--lg" onClick={() => ref.current?.demo()}>
           <span aria-hidden="true">👆</span> Ukaž mi
         </button>
@@ -41,7 +47,7 @@ function ObtahujView({ task, api }: { task: ObtahujTask; api: TaskApi }) {
           <span aria-hidden="true">↺</span> Znovu
         </button>
       </div>
-    </>
+    </div>
   );
 }
 

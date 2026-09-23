@@ -1,17 +1,29 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { Modal } from './components/Modal';
 import { CaseSwitch, SpeechCaption } from './components/ui';
 import { isActivityId } from './engine/meta';
-import { Session } from './engine/Session';
 import { greeting } from './kit';
 import { navigate, useRoute } from './lib/router';
 import { say, speech } from './lib/speech';
 import { childName, getAppSettings, setAppSettings, useAppSettings, useG92Settings } from './lib/store';
-import { Alphabet } from './screens/Alphabet';
+import { VoiceHelp } from './components/VoiceHelp';
 import { Home } from './screens/Home';
-import { Letters, Stickers } from './screens/Rewards';
-import { Settings, VoiceHelp } from './screens/Settings';
-import { TextReader } from './screens/TextReader';
+
+// Těžší části (cvičení s daty, abeceda…) se načítají až při otevření.
+const Session = lazy(() => import('./engine/Session').then((m) => ({ default: m.Session })));
+const Alphabet = lazy(() => import('./screens/Alphabet').then((m) => ({ default: m.Alphabet })));
+const TextReader = lazy(() => import('./screens/TextReader').then((m) => ({ default: m.TextReader })));
+const Settings = lazy(() => import('./screens/Settings').then((m) => ({ default: m.Settings })));
+const Stickers = lazy(() => import('./screens/Rewards').then((m) => ({ default: m.Stickers })));
+const Letters = lazy(() => import('./screens/Rewards').then((m) => ({ default: m.Letters })));
+
+function Loading() {
+  return (
+    <div className="grid place-items-center py-24" role="status" aria-label="Načítám">
+      <span className="g92-spinner" />
+    </div>
+  );
+}
 
 function HelpContent() {
   const rows: [string, string][] = [
@@ -60,6 +72,11 @@ export function App() {
     speech.configure({ voiceURI: settings.voiceURI, rate: settings.rate });
   }, [settings.voiceURI, settings.rate]);
 
+  // Psací písmo načíst dopředu, ať se písmenka neukážou nejdřív náhradním fontem.
+  useEffect(() => {
+    if (settings.letterCase === 'script') void document.fonts?.load('40px "Playwrite CZ"', 'aáčř').catch(() => {});
+  }, [settings.letterCase]);
+
   // Odkazy na staré stránky (abeceda.html…) přesměrujeme v public/*.html; tady jen neznámé cesty → domů.
   const [head, ...rest] = route.path;
   let screen: React.ReactNode;
@@ -107,7 +124,7 @@ export function App() {
           navigate('nastaveni');
         }}
       />
-      {screen}
+      <Suspense fallback={<Loading />}>{screen}</Suspense>
       <SpeechCaption />
       <Modal open={help} onClose={() => setHelp(false)} title="Jak to funguje" labelledBy="help-title" wide>
         <HelpContent />

@@ -92,8 +92,8 @@ const RAW: Record<CategoryId, Raw[]> = {
     ['dárek', '🎁'], ['balón', '🎈'], ['míč', '⚽'], ['kostka', '🎲'], ['medvídek', '🧸'], ['zvonek', '🔔'],
     ['sešit', '📓'], ['pravítko', '📏'], ['lupa', '🔍'], ['magnet', '🧲'], ['kladivo', '🔨'], ['pilka', '🪚'],
     ['šroubovák', '🪛'], ['fotoaparát', '📷'], ['dalekohled', '🔭'], ['dopis', '✉️'], ['noviny', '📰'],
-    ['mapa', '🗺️'], ['vlajka', '🚩'], ['baterka', '🔦'], ['meč', '🗡️'], ['štít', '🛡️'], ['diamant', '💎'],
-    ['tabule'], ['penál'], ['kružítko'], ['hrábě'], ['kolečko'], ['píšťalka'], ['ponožka'], ['tunel'],
+    ['mapa', '🗺️'], ['vlajka', '🚩'], ['baterka', '🔦'], ['štít', '🛡️'], ['diamant', '💎'],
+    ['meč'], ['tabule'], ['penál'], ['kružítko'], ['hrábě'], ['kolečko'], ['píšťalka'], ['ponožka'], ['tunel'],
     ['poklad'], ['trůn'], ['panenka'], ['kostky'], ['hračka'], ['guma'], ['lepidlo'], ['papír'],
   ],
   obleceni: [

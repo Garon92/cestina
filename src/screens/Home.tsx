@@ -77,7 +77,7 @@ export function Home({ onVoiceHelp }: { onVoiceHelp: () => void }) {
           </span>
           Hrát: {rec.title}
         </a>
-        <div aria-hidden="true" className="absolute -right-3 -top-4 text-[7rem] opacity-15 rotate-12 select-none pointer-events-none">
+        <div aria-hidden="true" className="hidden sm:block absolute -right-3 -top-4 text-[7rem] opacity-15 rotate-12 select-none pointer-events-none">
           🔤
         </div>
       </section>

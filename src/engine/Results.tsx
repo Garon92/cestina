@@ -57,7 +57,13 @@ export function Results({
       </p>
 
       <div className="panel w-full p-5 flex items-center gap-4 text-left" style={{ borderColor: 'var(--g92-gold)' }}>
-        <button type="button" className="sticker-reveal bg-transparent border-0 cursor-pointer" onClick={() => void say(outcome.sticker.name)} aria-label={`Nálepka ${outcome.sticker.name}`}>
+        <button
+          type="button"
+          className="sticker-reveal bg-transparent border-0 cursor-pointer shrink-0 grid place-items-center"
+          style={{ width: '1.3em', height: '1.3em', lineHeight: 1 }}
+          onClick={() => void say(outcome.sticker.name)}
+          aria-label={`Nálepka ${outcome.sticker.name}`}
+        >
           <EmojiPic e={outcome.sticker.e} label={outcome.sticker.name} />
         </button>
         <div className="min-w-0">

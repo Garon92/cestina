@@ -191,10 +191,21 @@ export interface ZacinaTask {
   options: string[];
 }
 
+/**
+ * Obrázky, které dítě může pojmenovat jinak (a jiným prvním písmenem): 🧥 bunda × kabát, 📱 telefon × mobil,
+ * 🚂 vlak × mašinka, 🏰 hrad × zámek… V „Na co začíná?“ by to byla nefér úloha, proto je vynecháme.
+ */
+export const AMBIGUOUS_NAMES = new Set([
+  'bunda', 'čepice', 'boty', 'telefon', 'počítač', 'plachetnice', 'vlak', 'náklaďák', 'kobliha', 'palačinka', 'hrozny',
+  'kaštan', 'pusa', 'máma', 'táta', 'čaroděj', 'hrad', 'fontána', 'batoh', 'dopis', 'kalhoty', 'vrtulník', 'voda',
+  'králík', 'rak', 'květina', 'tráva', 'vlna', 'princ', 'zeměkoule', 'kuře', 'list', 'talíř', 'kbelík', 'holka',
+]);
+
 export function genZacina(ctx: GenContext): ZacinaTask[] {
   const allowed = new Set(ctx.letters);
-  let words = PICTURE_WORDS.filter((w) => allowed.has(firstLetterKey(w.w)) && !/\s/.test(w.w));
-  if (words.length < 8) words = PICTURE_WORDS.filter((w) => !/\s/.test(w.w));
+  const base = PICTURE_WORDS.filter((w) => !/\s/.test(w.w) && !AMBIGUOUS_NAMES.has(w.w));
+  let words = base.filter((w) => allowed.has(firstLetterKey(w.w)));
+  if (words.length < 8) words = base;
   const pool = ALPHABET.filter((l) => allowed.has(l.key));
   const optPool = pool.length >= 6 ? pool : [...ALPHABET];
   // Nejdřív slova na písmena, která se dítě učí – vážený výběr podle prvního písmene.
@@ -270,12 +281,20 @@ export function genSlabiky(ctx: GenContext): SlabikyTask[] {
   });
 }
 
-/** Slova vhodná pro čtení po slabikách (2–3 slabiky, jednoduché, s obrázkem). */
-export function syllableWords(maxSyl = 3): Word[] {
+/** Počet zavřených slabik (končí souhláskou) – čím víc, tím těžší čtení po slabikách. */
+export function closedSyllables(word: string): number {
+  return syllabifyWord(word).filter((s) => !/[aáeéěiíoóuúůyý]$/i.test(s)).length;
+}
+
+/**
+ * Slova vhodná pro čtení po slabikách (2–3 slabiky, jednoduché, s obrázkem).
+ * Pro začátečníky jen slova s nejvýš jednou zavřenou slabikou (MÁ-MA, KO-ČKA ne, SA-LÁT ano, TRAK-TOR ne).
+ */
+export function syllableWords(maxSyl = 3, maxClosed = 1): Word[] {
   return PICTURE_WORDS.filter((w) => {
     if (!hasSimpleSyllables(w.w)) return false;
     const n = syllabifyWord(w.w).length;
-    return n >= 2 && n <= maxSyl && w.len <= 8;
+    return n >= 2 && n <= maxSyl && w.len <= 7 && closedSyllables(w.w) <= maxClosed;
   });
 }
 

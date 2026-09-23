@@ -19,8 +19,8 @@ interface Props {
   locked?: boolean;
 }
 
-const VIEW_TOP = -40;
-const VIEW_BOTTOM = 142;
+const VIEW_TOP = -50;
+const VIEW_BOTTOM = 154;
 
 /**
  * Plátno pro obtahování písmene prstem nebo myší.

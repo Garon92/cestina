@@ -236,7 +236,7 @@ body {
 .prompt-letter {
   font-weight: var(--g92-fw-black);
   font-size: clamp(6rem, 26vmin, 12rem);
-  line-height: 1;
+  line-height: 1.18;
   color: var(--lvl);
   text-shadow: 0 6px 0 color-mix(in oklab, var(--lvl) 22%, transparent);
 }
@@ -574,11 +574,74 @@ body {
 
 /* ─── Obtahování ───────────────────────────────────────────────────────── */
 
+.trace-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.trace-side {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.trace-model {
+  display: none;
+}
+
+@media (orientation: landscape) and (min-width: 700px) {
+  .trace-layout {
+    flex-direction: row;
+    justify-content: center;
+    gap: clamp(1rem, 4vw, 3rem);
+  }
+  .trace-layout > div:first-child {
+    width: auto;
+  }
+  .trace-layout .trace-wrap {
+    width: auto;
+    height: calc(100dvh - var(--g92-appbar-total, 60px) - 12rem);
+    min-height: 18rem;
+    max-height: none;
+  }
+  .trace-side {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .trace-model {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--g92-radius-xl);
+    background: var(--g92-surface);
+    border: 2px solid var(--g92-border);
+  }
+}
+
+.trace-model-letter {
+  font-size: 5rem;
+  font-weight: var(--g92-fw-black);
+  line-height: 1.05;
+  color: var(--lvl);
+}
+
+.trace-model-word {
+  font-weight: var(--g92-fw-bold);
+  font-size: var(--g92-fs-lg);
+}
+
 .trace-wrap {
   position: relative;
   width: min(100%, 34rem);
   aspect-ratio: 1 / 1.05;
-  max-height: calc(100dvh - var(--g92-appbar-total, 60px) - 12rem);
+  max-height: calc(100dvh - var(--g92-appbar-total, 60px) - 16rem);
   border-radius: var(--g92-radius-2xl);
   background: var(--g92-surface);
   border: 3px solid var(--g92-border);
