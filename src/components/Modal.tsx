@@ -23,7 +23,12 @@ export function Modal({
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (open && !d.open) d.showModal();
+    if (open && !d.open) {
+      d.showModal();
+      // like kit dialogs: focus the dialog itself so no focus ring lands on × when opened without keyboard use
+      d.tabIndex = -1;
+      d.focus({ preventScroll: true });
+    }
     if (!open && d.open) d.close();
   }, [open]);
   return (
