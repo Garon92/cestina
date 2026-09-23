@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { Modal } from './components/Modal';
 import { CaseSwitch, SpeechCaption } from './components/ui';
 import { isActivityId } from './engine/meta';
-import { greeting } from './kit';
+import { greeting, h, setHelp } from './kit';
 import { navigate, useRoute } from './lib/router';
 import { say, speech } from './lib/speech';
 import { childName, getAppSettings, setAppSettings, useAppSettings, useG92Settings } from './lib/store';
@@ -25,44 +25,50 @@ function Loading() {
   );
 }
 
-function HelpContent() {
-  const rows: [string, string][] = [
-    ['🔊', 'Ťukni na reproduktor a uslyšíš, co máš dělat.'],
-    ['▶', 'Velké tlačítko Hrát vybere, co je dobré procvičit.'],
-    ['🔤 🧩 📖 📝', 'Cesta vede od písmenek přes slabiky a slova až k větám.'],
-    ['⭐', 'Za každé cvičení dostaneš hvězdičky – tři jsou nejvíc.'],
-    ['📒', 'A k tomu nálepku do alba. Sesbíráš všechny?'],
-    ['✍️', 'V Obtahování piš prstem. Začni u zelené tečky a jeď po šipkách.'],
-    ['A a 𝒶', 'Tady si vybereš písmo: VELKÁ, malá, nebo psací.'],
-  ];
-  return (
-    <div className="flex flex-col gap-3">
-      {rows.map(([icon, text]) => (
-        <div key={text} className="flex items-center gap-3">
-          <span className="text-2xl w-20 text-center shrink-0" aria-hidden="true">
-            {icon}
-          </span>
-          <span className="flex-1">{text}</span>
-          <button type="button" className="g92-btn g92-btn--ghost g92-btn--icon g92-btn--sm" onClick={() => void say(text)} aria-label={`Přečíst: ${text}`}>
-            🔊
-          </button>
-        </div>
-      ))}
-      <p className="text-sm text-muted mt-2">
-        Pro rodiče: v Nastavení (⚙) najdete výběr hlasu, rychlost řeči, počet úloh, výběr procvičovaných písmen a toleranci obtahování. Postup se ukládá v tomto
-        zařízení.
-      </p>
-    </div>
-  );
+const HELP_STEPS = [
+  { icon: '🔊', text: 'Ťukni na reproduktor a uslyšíš, co máš dělat.' },
+  { icon: '▶️', text: 'Velké tlačítko Hrát vybere, co je dobré procvičit.' },
+  { icon: '🔤', text: 'Cesta vede od písmenek přes slabiky a slova až k větám.' },
+  { icon: '⭐', text: 'Za každé cvičení dostaneš hvězdičky – tři jsou nejvíc.' },
+  { icon: '📒', text: 'A k tomu nálepku do alba. Sesbíráš všechny?' },
+  { icon: '✍️', text: 'Při obtahování piš prstem. Začni u zelené tečky a jeď po šipkách.' },
+  { icon: '🅰️', text: 'Vpravo nahoře si vybereš písmo: velká, malá, nebo psací.' },
+];
+
+/** Nápověda v appbaru (kit): piktogramy + tlačítko, které ji celou přečte nahlas. */
+function useAppHelp() {
+  useEffect(() => {
+    const read = h(
+      'button',
+      { type: 'button', class: 'g92-btn g92-btn--soft', onclick: () => void say(HELP_STEPS.map((x) => x.text).join(' ')) },
+      '🔊 Přečíst nahlas',
+    );
+    const note = h(
+      'p',
+      { class: 'g92-hint' },
+      'Pro rodiče: v Nastavení (⚙) je výběr hlasu, rychlost řeči, počet úloh, procvičovaná písmena a přesnost obtahování. Postup se ukládá v tomto zařízení.',
+    );
+    return setHelp({
+      title: 'Jak to funguje',
+      howTo: HELP_STEPS,
+      keys: [
+        { keys: ['1', '2', '3', '4'], text: 'vybrat odpověď' },
+        { keys: ['Esc'], text: 'přeskočit úlohu' },
+        { keys: ['←', '→'], text: 'další písmeno v abecedě' },
+      ],
+      extra: h('div', { class: 'g92-stack' }, read, note),
+    });
+  }, []);
 }
 
 export function App() {
   const route = useRoute();
   const settings = useAppSettings();
   const g = useG92Settings();
-  const [help, setHelp] = useState(false);
   const [voiceHelp, setVoiceHelp] = useState(false);
   const [welcome, setWelcome] = useState(() => !getAppSettings().onboarded);
+
+  useAppHelp();
 
   useEffect(() => {
     speech.init();
@@ -117,8 +123,6 @@ export function App() {
     <div className="g92-app">
       <g92-appbar
         app="cestina"
-        help
-        ong92-help={() => setHelp(true)}
         ong92-settings={(e: CustomEvent) => {
           e.preventDefault();
           navigate('nastaveni');
@@ -126,9 +130,6 @@ export function App() {
       />
       <Suspense fallback={<Loading />}>{screen}</Suspense>
       <SpeechCaption />
-      <Modal open={help} onClose={() => setHelp(false)} title="Jak to funguje" labelledBy="help-title" wide>
-        <HelpContent />
-      </Modal>
       <Modal open={voiceHelp} onClose={() => setVoiceHelp(false)} title="Český hlas" labelledBy="voice-title">
         <VoiceHelp />
       </Modal>

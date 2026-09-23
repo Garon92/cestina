@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CaseSwitch, HomeIcon, ProgressDots, SpeakButton } from '../components/ui';
 import { LETTER_KEYS } from '../data/alphabet';
-import { confirmDialog, confetti, recordActivity, sfx, toast } from '../kit';
+import { confirmDialog, confetti, createDaily, haptic, recordActivity, sfx, toast } from '../kit';
 import { lettersMasteredRatio, ownedStickerCount, recordLetter, recordSession, type SessionOutcome } from '../lib/progress';
 import { mulberry32 } from '../lib/random';
 import { navigate } from '../lib/router';
@@ -13,6 +13,9 @@ import { Results } from './Results';
 import type { LetterResult, ReviewItem, TaskApi } from './types';
 
 const PRAISE = ['Výborně!', 'Správně!', 'Super!', 'Paráda!', 'Skvěle!', 'Bezva!', 'Jupí!', 'Přesně tak!'];
+
+/** Denní počet vyřešených úloh + série dní (kit) – čte ho i menu („Dnes procvičeno“). */
+const daily = createDaily('cestina', { goal: 24 });
 
 export function levelColor(id: ActivityId): string {
   const lvl = ACTIVITY_BY_ID.get(id)?.level;
@@ -131,6 +134,7 @@ export function Session({ id, focus }: { id: ActivityId; focus?: string }) {
     mistake: (opts) => {
       if (solved) return;
       sfx.error();
+      haptic('error');
       streak.current = 0;
       setMistakes((m) => {
         const c = [...m];
@@ -145,6 +149,8 @@ export function Session({ id, focus }: { id: ActivityId; focus?: string }) {
       const my = ++seq.current;
       const miss = mistakes[index] ?? 0;
       sfx.success();
+      haptic('success');
+      daily.record();
       if (miss === 0) {
         streak.current++;
         bestStreak.current = Math.max(bestStreak.current, streak.current);
