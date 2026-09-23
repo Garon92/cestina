@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { Modal } from './components/Modal';
 import { CaseSwitch, SpeechCaption } from './components/ui';
 import { isSessionId } from './engine/meta';
-import { HELP_TITLE_LEARN, appTitle, h, setHelp, setSettingsSection, showHelp, vocative } from './kit';
+import { HELP_TITLE_LEARN, LABELS, appTitle, h, setHelp, setSettingsSection, showHelp, vocative } from './kit';
 import { CESTINA_SETTINGS } from './lib/settingsSection';
 import { useRoute } from './lib/router';
 import { say, speech } from './lib/speech';
@@ -157,7 +157,7 @@ export function App() {
         labelledBy="welcome-title"
         footer={
           <button type="button" className="g92-btn g92-btn--lg g92-btn--block" onClick={startWelcome} autoFocus>
-            <span aria-hidden="true">▶</span> Začít
+            {LABELS.intro} <span aria-hidden="true">→</span>
           </button>
         }
       >
