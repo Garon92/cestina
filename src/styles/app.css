@@ -384,6 +384,16 @@ body {
   transform: scale(1.35);
 }
 
+@media (max-width: 480px) {
+  .dots {
+    gap: 4px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
 .dot.is-ok {
   background: var(--g92-success);
 }

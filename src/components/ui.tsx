@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useRoute } from '../lib/router';
 import { say, useSpeech } from '../lib/speech';
 import { setAppSettings, useAppSettings } from '../lib/store';
 import { syllabifyWord } from '../lib/syllables';
@@ -202,6 +203,9 @@ export function SpeechCaption() {
   const settings = useAppSettings();
   const [visible, setVisible] = useState<{ text: string; at: number } | null>(null);
   const show = settings.captions || status === 'no-czech' || status === 'unsupported';
+  const route = useRoute();
+  // Nová obrazovka = starý titulek pryč.
+  useEffect(() => setVisible(null), [route]);
   useEffect(() => {
     if (!caption || !show) return;
     setVisible(caption);

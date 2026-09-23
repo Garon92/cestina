@@ -81,7 +81,7 @@ export function Session({ id, focus }: { id: ActivityId; focus?: string }) {
     const text = promptText(index === 0);
     const cap = def.caption?.(task, mode);
     const t = window.setTimeout(() => {
-      if (text) void say(text, cap && index > 0 ? { caption: cap } : undefined);
+      if (text) void say(text, cap ? { caption: index === 0 ? `${def.meta.intro} ${cap}` : cap } : undefined);
     }, index === 0 ? 350 : 150);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -267,14 +267,19 @@ export function Session({ id, focus }: { id: ActivityId; focus?: string }) {
         <SpeakButton text={() => [instruction, promptText(false)].filter(Boolean).join('. ')} size={52} label="Přečíst zadání" caption={def.caption?.(task, mode)} />
         <h1 className="text-xl sm:text-2xl font-black leading-tight text-balance">{instruction}</h1>
       </div>
-      <main className="play-stage" aria-live="off">
-        <Comp key={`${seed}-${index}`} task={task} api={api} index={index} />
+      <main className="flex flex-1 flex-col">
+        <div key={`${seed}-${index}`} className="play-stage g92-anim-float-in">
+          <Comp task={task} api={api} index={index} />
+        </div>
       </main>
       {praise ? (
-        <div className="praise" key={praise.key} aria-live="assertive">
+        <div className="praise" key={praise.key} aria-hidden="true">
           <div className="praise-bubble">{praise.text}</div>
         </div>
       ) : null}
+      <p className="g92-sr-only" aria-live="assertive">
+        {praise ? praise.text : (mistakes[index] ?? 0) > 0 ? `To není ono, zkus to znovu (${mistakes[index]}).` : ''}
+      </p>
     </div>
   );
 }
