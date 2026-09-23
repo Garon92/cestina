@@ -392,11 +392,19 @@ body {
 
 @media (max-width: 480px) {
   .dots {
-    gap: 4px;
+    gap: 3px;
   }
   .dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* Na telefonu na výšku by čtvercová písmenka vytlačila spodní řadu pod okraj. */
+@media (max-width: 639px) {
+  .choices .tile--letter {
+    aspect-ratio: auto;
+    min-height: clamp(4.5rem, 15vh, 8rem);
   }
 }
 
