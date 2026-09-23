@@ -42,6 +42,8 @@ export function Alphabet() {
   useEffect(() => {
     if (open === null) return;
     const onKey = (e: KeyboardEvent) => {
+      // Jen když je navrchu náš detail písmene, ne kitový dialog (nastavení, nápověda).
+      if (document.querySelector('dialog[open]:not([aria-labelledby="letter-detail-title"])')) return;
       if (e.key === 'ArrowRight') show((open + 1) % ALPHABET.length);
       if (e.key === 'ArrowLeft') show((open - 1 + ALPHABET.length) % ALPHABET.length);
     };

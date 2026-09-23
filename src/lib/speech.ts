@@ -9,6 +9,7 @@
  * - Když český hlas chybí nebo syntéza není, stav to řekne a UI ukáže titulek s textem (rodič ho přečte).
  */
 import { useSyncExternalStore } from 'react';
+import { getSettings } from '../kit/settings';
 import { forSpeech } from './text';
 
 export type SpeechStatus = 'loading' | 'ready' | 'no-czech' | 'unsupported';
@@ -96,6 +97,8 @@ class SpeechEngine {
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) this.cancel();
     });
+    // Kitový dialog (nastavení, nápověda, „Skončit cvičení?“) = pauza: rozmluvené zadání utnout.
+    document.addEventListener('g92-dialog-open', () => this.cancel());
   }
 
   private loadVoices(): void {
@@ -171,10 +174,15 @@ class SpeechEngine {
    * Řekne text česky. `rate` je násobek rychlosti z nastavení.
    * Vrací Promise – splní se po dořečení, chybě nebo časovém limitu (nikdy nevisí).
    */
-  speak(text: string, opts: { rate?: number; caption?: string } = {}): Promise<void> {
+  speak(text: string, opts: { rate?: number; caption?: string; auto?: boolean } = {}): Promise<void> {
     const clean = forSpeech(text).trim();
     this.set({ caption: { text: opts.caption ?? text, at: Date.now() } });
     if (!clean) return Promise.resolve();
+    // Automatické předčítání se řídí kitovým „Předčítání“ (voice); ťuknutí na 🔊 mluví vždy (C-13, CESTINA-12).
+    if (opts.auto && !getSettings().voice) {
+      this.cancel();
+      return wait(Math.min(1200, 300 + clean.length * 30));
+    }
     if (!this.synth || this.state.status === 'unsupported') return wait(Math.min(2500, 400 + clean.length * 60));
     // Hlasy existují, ale žádný český → prohlížeč by četl anglicky („bé“ jako „bee“). Radši jen titulek.
     if (this.state.status === 'no-czech' && this.allVoices.length > 0) return wait(Math.min(2500, 400 + clean.length * 60));
@@ -255,6 +263,12 @@ export function useSpeech(): SpeechState {
   return useSyncExternalStore(speech.subscribe, speech.getState, speech.getState);
 }
 
+/** Promluva, o kterou si dítě řeklo (ťuknutí na 🔊, obrázek…) – mluví vždy. */
 export function say(text: string, opts?: { rate?: number; caption?: string }): Promise<void> {
   return speech.speak(text, opts);
+}
+
+/** Automatická promluva (zadání, pochvala, zpětná vazba) – jen když je zapnuté „Předčítání“. */
+export function sayAuto(text: string, opts?: { rate?: number; caption?: string }): Promise<void> {
+  return speech.speak(text, { ...opts, auto: true });
 }

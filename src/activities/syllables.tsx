@@ -13,7 +13,7 @@ import {
 } from '../engine/generators';
 import { ACTIVITY_BY_ID } from '../engine/meta';
 import { defineActivity, type TaskApi } from '../engine/types';
-import { say } from '../lib/speech';
+import { say, sayAuto } from '../lib/speech';
 import { hyphenate } from '../lib/syllables';
 import { caseWord } from '../lib/text';
 
@@ -96,7 +96,7 @@ function SkladejSlabikyView({ task, api }: { task: SkladejSlabikyTask; api: Task
         big
         showHint={hint}
         render={(u) => caseWord(u, api.mode)}
-        onPiece={(u) => void say(u)}
+        onPiece={(u) => void sayAuto(u)}
         onComplete={() => api.done({ say: `${task.syllables.join(' ')}. ${task.word}!` })}
       />
       {!hint && api.mistakes >= 1 ? (

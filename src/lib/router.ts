@@ -21,13 +21,12 @@ type LeaveGuard = () => Promise<boolean>;
 let guard: LeaveGuard | null = null;
 let asking = false;
 
-/** Dokud je nastavený, odchod přes historii (Zpět) se nejdřív zeptá. `null` = hlídání vypnout. */
-export function setLeaveGuard(fn: LeaveGuard | null): void {
+/** Dokud je nastavený, odchod přes historii (Zpět) se nejdřív zeptá. Vrací funkci pro zrušení. */
+export function setHashGuard(fn: LeaveGuard | null): () => void {
   guard = fn;
-}
-
-export function hasLeaveGuard(): boolean {
-  return guard !== null;
+  return () => {
+    if (guard === fn) guard = null;
+  };
 }
 
 function commit(): void {

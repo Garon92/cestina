@@ -17,7 +17,7 @@ import {
 } from '../engine/generators';
 import { ACTIVITY_BY_ID } from '../engine/meta';
 import { defineActivity, type TaskApi } from '../engine/types';
-import { say } from '../lib/speech';
+import { say, sayAuto } from '../lib/speech';
 import { caseWord } from '../lib/text';
 import { sfx } from '../kit';
 
@@ -239,12 +239,12 @@ function DiktatView({ task, api }: { task: DiktatTask; api: TaskApi }) {
     setMarks(target.map((c, i) => (t[i] === c ? 'ok' : 'bad')));
     setFails((f) => f + 1);
     api.mistake();
-    void say(fails >= 1 ? `Skoro. Píše se to takhle: ${task.word}.` : 'Skoro! Oprav červená písmenka.');
+    void sayAuto(fails >= 1 ? `Skoro. Píše se to takhle: ${task.word}.` : 'Skoro! Oprav červená písmenka.');
   };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
       if (e.key === 'Backspace') {
         e.preventDefault();
         back();

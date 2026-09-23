@@ -3,7 +3,7 @@
  * Staré klíče (`cestina_progress`, `cestina_recent_texts`) se při prvním spuštění převedou.
  */
 import { useSyncExternalStore } from 'react';
-import { createStore, getSettingsSnapshot, subscribeSettings, type G92Settings } from '../kit';
+import { createStore, getPlayerName, getSettingsSnapshot, subscribeSettings, type G92Settings } from '../kit';
 import { COMMON_LETTERS, LETTER_KEYS } from '../data/alphabet';
 import { emptyProgress, migrateLegacyProgress, type Progress } from './progress';
 import type { LetterCase } from './text';
@@ -14,8 +14,6 @@ export interface AppSettings {
   letterCase: LetterCase;
   /** Barevně odlišené slabiky ve slovech (jako ve slabikáři). */
   syllableColors: boolean;
-  /** Automaticky předčítat zadání. */
-  autoSpeak: boolean;
   /** Vybraný hlas ('' = automaticky nejlepší český). */
   voiceURI: string;
   /** Rychlost řeči 0.6–1.2. */
@@ -34,7 +32,6 @@ export interface AppSettings {
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   letterCase: 'upper',
   syllableColors: false,
-  autoSpeak: true,
   voiceURI: '',
   rate: 0.9,
   sessionLength: 8,
@@ -80,7 +77,6 @@ function sanitizeSettings(raw: unknown): AppSettings {
   return {
     letterCase: r.letterCase === 'lower' || r.letterCase === 'script' || r.letterCase === 'upper' ? r.letterCase : d.letterCase,
     syllableColors: typeof r.syllableColors === 'boolean' ? r.syllableColors : d.syllableColors,
-    autoSpeak: typeof r.autoSpeak === 'boolean' ? r.autoSpeak : d.autoSpeak,
     voiceURI: typeof r.voiceURI === 'string' ? r.voiceURI : d.voiceURI,
     rate: typeof r.rate === 'number' && r.rate >= 0.5 && r.rate <= 1.5 ? r.rate : d.rate,
     sessionLength: [5, 8, 10, 15].includes(Number(r.sessionLength)) ? Number(r.sessionLength) : d.sessionLength,
@@ -178,7 +174,10 @@ export function useG92Settings(): Readonly<G92Settings> {
   return useSyncExternalStore(subscribeSettings, getSettingsSnapshot, getSettingsSnapshot);
 }
 
-/** Jméno dítěte – z globálního nastavení, výchozí „Adámek“ (aplikace je pro Adámka). */
-export function childName(s: Readonly<G92Settings>): string {
-  return s.playerName.trim() || 'Adámek';
+/**
+ * Jméno dítěte: vlastní jméno v této aplikaci, jinak rodinné (kit getPlayerName), výchozí „Adámek“.
+ * Parametr `_s` jen kvůli překreslení při změně nastavení (useG92Settings).
+ */
+export function childName(_s?: Readonly<G92Settings>): string {
+  return getPlayerName('cestina').trim() || 'Adámek';
 }

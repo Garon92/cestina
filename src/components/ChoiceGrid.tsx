@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import type { TaskApi } from '../engine/types';
-import { say } from '../lib/speech';
+import { sayAuto } from '../lib/speech';
 
 export interface Choice {
   id: string;
@@ -50,13 +50,13 @@ export function ChoiceGrid({
       window.setTimeout(() => setShaking((s) => (s === id ? null : s)), 450);
       const s = sayOnWrong?.(id);
       api.mistake();
-      if (s) void say(s);
+      if (s) void sayAuto(s);
     }
   };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
       const target = e.target as HTMLElement | null;
       if (target?.closest('input, textarea, [contenteditable="true"]')) return;
       const n = Number(e.key);

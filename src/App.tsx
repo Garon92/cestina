@@ -2,9 +2,9 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { Modal } from './components/Modal';
 import { CaseSwitch, SpeechCaption } from './components/ui';
 import { isSessionId } from './engine/meta';
-import { h, setHelp, showHelp, vocative } from './kit';
-import { hasLeaveGuard, navigate, setLeaveGuard, useRoute } from './lib/router';
-import { confirmLeave } from './engine/leave';
+import { HELP_TITLE_LEARN, appTitle, h, setHelp, setSettingsSection, showHelp, vocative } from './kit';
+import { CESTINA_SETTINGS } from './lib/settingsSection';
+import { useRoute } from './lib/router';
 import { say, speech } from './lib/speech';
 import { childName, getAppSettings, setAppSettings, useAppSettings, useG92Settings } from './lib/store';
 import { VoiceHelp } from './components/VoiceHelp';
@@ -37,19 +37,26 @@ const HELP_STEPS = [
 ];
 
 const HELP = {
-  title: 'Jak na to',
+  title: HELP_TITLE_LEARN,
   howTo: HELP_STEPS,
   keys: [
     { keys: ['1', '2', '3', '4'], text: 'vybrat odpověď' },
     { keys: ['Esc'], text: 'přeskočit úlohu' },
     { keys: ['←', '→'], text: 'další písmeno v abecedě' },
+    { keys: ['M'], text: 'zvuk zapnout / vypnout (mimo cvičení)' },
+    { keys: ['?'], text: 'nápověda (mimo cvičení)' },
   ],
   extra: h(
     'p',
     { class: 'g92-hint' },
-    'Pro rodiče: v Nastavení (⚙) je výběr hlasu, rychlost řeči, počet úloh, procvičovaná písmena a přesnost obtahování. Postup se ukládá v tomto zařízení.',
+    'Pro rodiče: ⚙ nahoře – písmo, zvuky, předčítání, vzhled a jméno. Pod „Další nastavení pro rodiče…“ je výběr hlasu, rychlost řeči, počet úloh, procvičovaná písmena, přesnost obtahování a smazání postupu. Postup se ukládá v tomto zařízení.',
   ),
 };
+
+/** ⚙ v liště = kitový dialog + sekce čeština (viz lib/settingsSection.ts). */
+function useSettingsSection() {
+  useEffect(() => setSettingsSection(CESTINA_SETTINGS), []);
+}
 
 /**
  * Nápověda v appbaru (kit „?“). Dítě neumí číst, takže „🔊 Přečíst nahlas“ musí být úplně nahoře –
@@ -83,28 +90,10 @@ export function App() {
   const [welcome, setWelcome] = useState(() => !getAppSettings().onboarded);
 
   useAppHelp();
+  useSettingsSection();
 
   useEffect(() => {
     speech.init();
-  }, []);
-
-  // „‹ Menu“ v liště během rozehraného cvičení: nejdřív se zeptat (CESTINA-11).
-  // Lišta je web component se shadow DOM – odkaz najdeme přes composedPath().
-  useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      if (!hasLeaveGuard() || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
-      const link = e.composedPath().find((n): n is HTMLAnchorElement => n instanceof HTMLAnchorElement && n.classList.contains('back'));
-      const host = (link?.getRootNode() as ShadowRoot | undefined)?.host;
-      if (!link || host?.localName !== 'g92-appbar') return;
-      e.preventDefault();
-      void confirmLeave().then((ok) => {
-        if (!ok) return;
-        setLeaveGuard(null);
-        location.href = link.href;
-      });
-    };
-    document.addEventListener('click', onClick, true);
-    return () => document.removeEventListener('click', onClick, true);
   }, []);
 
   useEffect(() => {
@@ -119,25 +108,25 @@ export function App() {
   // Odkazy na staré stránky (abeceda.html…) přesměrujeme v public/*.html; tady jen neznámé cesty → domů.
   const [head, ...rest] = route.path;
   let screen: React.ReactNode;
-  let title = 'Čeština pro Adámka';
+  let title = appTitle('cestina');
   if (!head) screen = <Home onVoiceHelp={() => setVoiceHelp(true)} />;
   else if (head === 'hra' && rest[0] && isSessionId(rest[0])) {
     screen = <Session key={`${rest[0]}-${route.query.get('pismeno') ?? ''}`} id={rest[0]} focus={route.query.get('pismeno') ?? undefined} />;
   } else if (head === 'abeceda') {
     screen = <Alphabet />;
-    title = 'Abeceda – Čeština';
+    title = appTitle('cestina', 'Abeceda');
   } else if (head === 'pis') {
     screen = <TextReader />;
-    title = 'Piš a poslouchej – Čeština';
+    title = appTitle('cestina', 'Piš a poslouchej');
   } else if (head === 'nalepky') {
     screen = <Stickers />;
-    title = 'Nálepky – Čeština';
+    title = appTitle('cestina', 'Nálepky');
   } else if (head === 'pismenka') {
     screen = <Letters />;
-    title = 'Co už umím – Čeština';
+    title = appTitle('cestina', 'Co už umím');
   } else if (head === 'nastaveni') {
     screen = <Settings />;
-    title = 'Nastavení – Čeština';
+    title = appTitle('cestina', 'Pro rodiče');
   } else {
     screen = <Home onVoiceHelp={() => setVoiceHelp(true)} />;
   }
@@ -154,13 +143,8 @@ export function App() {
 
   return (
     <div className="g92-app">
-      <g92-appbar
-        app="cestina"
-        ong92-settings={(e: CustomEvent) => {
-          e.preventDefault();
-          navigate('nastaveni');
-        }}
-      />
+      {/* M/F/? z kitu jen mimo cvičení – v Diktátu a Skládání se píšou písmena (m, f…) na klávesnici. */}
+      <g92-appbar app="cestina" keys={head !== 'hra'} />
       <Suspense fallback={<Loading />}>{screen}</Suspense>
       <SpeechCaption />
       <Modal open={voiceHelp} onClose={() => setVoiceHelp(false)} title="Český hlas" labelledBy="voice-title">
@@ -186,7 +170,7 @@ export function App() {
             <p className="text-sm text-muted">Jaké písmo se učíš?</p>
             <CaseSwitch />
           </div>
-          <p className="text-xs text-muted">Pro rodiče: jméno, hlas a výběr písmen najdete v Nastavení (⚙ nahoře).</p>
+          <p className="text-xs text-muted">Pro rodiče: jméno, hlas a výběr písmen najdete pod ⚙ nahoře.</p>
         </div>
       </Modal>
     </div>

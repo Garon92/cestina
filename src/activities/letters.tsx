@@ -16,7 +16,7 @@ import {
 } from '../engine/generators';
 import { ACTIVITY_BY_ID } from '../engine/meta';
 import { defineActivity, type TaskApi } from '../engine/types';
-import { say } from '../lib/speech';
+import { say, sayAuto } from '../lib/speech';
 import { caseLetter, capitalize, caseWord, type LetterCase } from '../lib/text';
 import { sfx } from '../kit';
 
@@ -111,13 +111,13 @@ function HledejView({ task, api }: { task: HledejTask; api: TaskApi }) {
       if (next.length >= total) api.done({ say: `Všechna ${name(task.letter)}!` });
       else {
         sfx.pop();
-        void say(name(task.letter));
+        void sayAuto(name(task.letter));
       }
     } else {
       setShake(i);
       window.setTimeout(() => setShake((s) => (s === i ? null : s)), 450);
       api.mistake();
-      void say(`To je ${name(task.cells[i]!)}.`);
+      void sayAuto(`To je ${name(task.cells[i]!)}.`);
     }
   };
   const hint = api.mistakes >= 2;
@@ -248,7 +248,7 @@ function ParovaniView({ task, api }: { task: ParovaniTask; api: TaskApi }) {
         });
       } else {
         sfx.pop();
-        void say(name(key));
+        void sayAuto(name(key));
       }
     } else {
       const id = `${side}-${key}`;

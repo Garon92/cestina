@@ -56,7 +56,8 @@ export function Builder({
   // Psaní z klávesnice (jen pro písmenkové dílky).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
+      // Otevřený dialog (nastavení, „Skončit cvičení?“) = cvičení stojí, klávesy nepatří jemu.
+      if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1 || document.querySelector('dialog[open]')) return;
       const k = norm(e.key);
       const expected = target[filled];
       if (!expected) return;

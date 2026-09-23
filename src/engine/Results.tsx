@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { BigStars, EmojiPic, HomeIcon, SpeakButton } from '../components/ui';
 import { vocative } from '../kit';
 import { DAILY_GOAL, todayCount, type SessionOutcome } from '../lib/progress';
-import { say } from '../lib/speech';
+import { say, sayAuto } from '../lib/speech';
 import { childName, getProgress, useG92Settings } from '../lib/store';
 import { plural } from '../lib/text';
 import type { ActivityMeta } from './meta';
@@ -54,7 +54,7 @@ export function Results({
       const sticker = st ? (outcome.isNewSticker ? `A novou nálepku: ${st.name}!` : `A nálepku: ${st.name}.`) : '';
       text = `${title} Máš ${stars}. ${sticker}`;
     }
-    const t = window.setTimeout(() => void say(text), 500);
+    const t = window.setTimeout(() => void sayAuto(text), 500);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

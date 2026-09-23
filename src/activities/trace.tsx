@@ -5,7 +5,7 @@ import { genObtahuj, type ObtahujTask } from '../engine/generators';
 import { ACTIVITY_BY_ID } from '../engine/meta';
 import { defineActivity, type TaskApi } from '../engine/types';
 import { recordTraced } from '../lib/progress';
-import { say } from '../lib/speech';
+import { sayAuto } from '../lib/speech';
 import { updateProgress } from '../lib/store';
 import { TOLERANCE } from '../lib/tracer';
 
@@ -27,9 +27,9 @@ function ObtahujView({ task, api }: { task: ObtahujTask; api: TaskApi }) {
             // Dítě neumí číst – chybu mu řekneme nahlas a hned ukážeme, jak na to (CESTINA-07).
             api.mistake({ say: 'Kousek vedle. Zkus to znovu.' });
             window.setTimeout(() => ref.current?.demo(), 450);
-          } else void say('Začni u zelené tečky.');
+          } else void sayAuto('Začni u zelené tečky.');
         }}
-        onLift={() => void say('Pokračuj, kde jsi skončil.')}
+        onLift={() => void sayAuto('Pokračuj, kde jsi skončil.')}
         onComplete={() => {
           updateProgress((p) => recordTraced(p, task.letter, Date.now()));
           api.done({ say: `${l.say}. ${l.word}.` });

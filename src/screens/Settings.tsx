@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { CaseSwitch, HoldButton, HomeLink } from '../components/ui';
+import { HoldButton, HomeLink } from '../components/ui';
 import { VoiceHelp } from '../components/VoiceHelp';
 import { ALPHABET, LETTER_KEYS, LETTER_PRESETS } from '../data/alphabet';
-import { clearActivity, confirmDialog, openSettingsDialog, safeStorage, setSettings, toast, vocative, KIT_VERSION } from '../kit';
-import { emptyProgress } from '../lib/progress';
+import { confirmDialog, openSettingsDialog, resetApp, toast, KIT_VERSION } from '../kit';
+import { CESTINA_SETTINGS } from '../lib/settingsSection';
 import { say, speech, useSpeech } from '../lib/speech';
-import { childName, setAppSettings, setProgress, useAppSettings, useG92Settings, useProgress, type TraceTolerance } from '../lib/store';
+import { setAppSettings, useAppSettings, useProgress, type TraceTolerance } from '../lib/store';
 
 const NUMBERS: [number, string][] = [
   [3, 'tři'],
@@ -68,7 +68,6 @@ const TOL: { v: TraceTolerance; label: string }[] = [
 
 export function Settings() {
   const s = useAppSettings();
-  const g = useG92Settings();
   const p = useProgress();
   const { status, voices, activeVoice } = useSpeech();
   const [unlocked, setUnlocked] = useState(false);
@@ -91,11 +90,10 @@ export function Settings() {
       danger: true,
     });
     if (ok) {
-      setProgress(emptyProgress());
-      // Vymazat i to, co z postupu vidí menu: denní počty/série a „naposledy hráno“ (CESTINA-10).
-      safeStorage.removeItem('g92:cestina:daily');
-      clearActivity('cestina');
-      toast('Postup smazán.', { variant: 'success' });
+      // Kit smaže všechny klíče g92:cestina:* (postup, denní cíl a série, „naposledy hráno“ v menu – CESTINA-10);
+      // nastavení, napsané texty, jméno a skrytý banner zůstávají. Reload = čisté cache úložiště.
+      resetApp('cestina', { keep: ['settings', 'texts', '__version', 'voice-banner', 'name'] });
+      location.reload();
     }
   };
 
@@ -106,33 +104,15 @@ export function Settings() {
     <div className="screen screen--narrow">
       <div className="flex items-center gap-3 mb-5">
         <HomeLink />
-        <h1 className="text-3xl font-black">Nastavení</h1>
+        <h1 className="text-3xl font-black">Pro rodiče</h1>
       </div>
 
-      <section className="panel p-5 flex flex-col gap-5" aria-labelledby="set-kid">
-        <h2 id="set-kid" className="text-xl font-black">
-          Písmo a vzhled
-        </h2>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="font-bold">Písmo</p>
-            <p className="text-sm text-muted">Jak se píšou písmenka a slova ve všech cvičeních.</p>
-          </div>
-          <CaseSwitch />
-        </div>
-        <label className="g92-switch-row">
-          <span>
-            <span className="font-bold block">Barevné slabiky</span>
-            <span className="text-sm text-muted">Slova ve cvičení „Co je napsáno?“ střídají barvu po slabikách.</span>
-          </span>
-          <input type="checkbox" className="g92-toggle" role="switch" checked={s.syllableColors} onChange={(e) => setAppSettings({ syllableColors: e.target.checked })} />
-        </label>
-        <label className="g92-switch-row">
-          <span className="font-bold">Zvuky</span>
-          <input type="checkbox" className="g92-toggle" role="switch" checked={g.sound} onChange={(e) => setSettings({ sound: e.target.checked })} />
-        </label>
-        <button type="button" className="g92-btn g92-btn--secondary self-start" onClick={() => openSettingsDialog({ hideName: true })}>
-          <span aria-hidden="true">🎨</span> Vzhled, hlasitost, animace…
+      <section className="panel p-5 flex flex-wrap items-center gap-4" aria-label="Základní nastavení">
+        <p className="flex-1 min-w-[14rem] text-sm text-muted">
+          Písmo, zvuky, předčítání, vzhled a jméno dítěte jsou v nastavení aplikace (⚙ nahoře). Tady je to, co se hodí jen rodičům.
+        </p>
+        <button type="button" className="g92-btn g92-btn--secondary" onClick={() => openSettingsDialog({ appId: 'cestina', ...CESTINA_SETTINGS, more: undefined })}>
+          <span aria-hidden="true">⚙</span> Nastavení aplikace
         </button>
       </section>
 
@@ -141,32 +121,12 @@ export function Settings() {
           <p className="text-4xl" aria-hidden="true">
             👨‍👩‍👦
           </p>
-          <p className="font-black text-xl">Pro rodiče</p>
+          <p className="font-black text-xl">Zamčeno pro děti</p>
           <p className="text-muted text-sm max-w-[26rem]">Hlas, délka cvičení, výběr písmen a smazání postupu. Pro odemčení podržte tlačítko a pak ťukněte na správné číslo.</p>
           <ParentGate onPass={() => setUnlocked(true)} />
         </section>
       ) : (
         <>
-          <section className="panel p-5 mt-5 flex flex-col gap-5" aria-labelledby="set-name">
-            <h2 id="set-name" className="text-xl font-black">
-              Dítě
-            </h2>
-            <div className="g92-field">
-              <label className="g92-label" htmlFor="child-name">
-                Jméno
-              </label>
-              <input
-                id="child-name"
-                className="g92-input"
-                value={g.playerName}
-                placeholder="Adámek"
-                maxLength={40}
-                onChange={(e) => setSettings({ playerName: e.target.value })}
-              />
-              <p className="g92-hint">Aplikace pozdraví: „Ahoj, {vocative(childName(g))}!“ (jméno sdílí všechny hry v menu)</p>
-            </div>
-          </section>
-
           <section className="panel p-5 mt-5 flex flex-col gap-5" aria-labelledby="set-voice">
             <h2 id="set-voice" className="text-xl font-black">
               Hlas
@@ -221,13 +181,7 @@ export function Settings() {
                 <span aria-hidden="true">🔊</span> Vyzkoušet hlas
               </button>
             </div>
-            <label className="g92-switch-row">
-              <span>
-                <span className="font-bold block">Předčítat zadání automaticky</span>
-                <span className="text-sm text-muted">Na začátku každé úlohy aplikace řekne, co dělat.</span>
-              </span>
-              <input type="checkbox" className="g92-toggle" role="switch" checked={s.autoSpeak} onChange={(e) => setAppSettings({ autoSpeak: e.target.checked })} />
-            </label>
+            <p className="g92-hint">Automatické předčítání zadání se zapíná a vypíná v nastavení aplikace (⚙ → Předčítání); ťuknutí na 🔊 mluví vždy.</p>
             <label className="g92-switch-row">
               <span>
                 <span className="font-bold block">Titulky</span>
